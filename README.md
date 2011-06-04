@@ -58,6 +58,22 @@ The options for `contains` are as follows:
   `length`
 * `:fixed_numeric` - numbers only, but with the number of characters always the same as `length`
 
+### Examples:
+
+* `token :length => 8, :contains => :alphanumeric` generates something like `8Sdc98dQ`
+* `token :length => 5, :contains => :alpha` gereates something like
+  `ASlkj`
+* `token :length => 4, :contains => :numeric` could generate anything
+  from `0` upto `9999` - but in a random order
+* `token :length => 4, :contains => :fixed_numeric` will generate
+  anything from `0000` to `9999` in a random order
+
+## Finders
+
+The library also contains a finder method for looking up your documents
+called `find_by_token`, e.g:
+
+    Person.find_by_token('7dDn8q')
 
 # Notes
 
