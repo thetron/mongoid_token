@@ -68,12 +68,21 @@ The options for `contains` are as follows:
 * `token :length => 4, :contains => :fixed_numeric` will generate
   anything from `0000` to `9999` in a random order
 
+
 ## Finders
 
 The library also contains a finder method for looking up your documents
 called `find_by_token`, e.g:
 
     Person.find_by_token('7dDn8q')
+
+
+## Adding tokens to existing documents
+
+If you've got an app with existing data that you would like to add
+tokens to - all you need to do is save each of your models and they will
+be assigned a token, if it's missing.
+
 
 # Notes
 
