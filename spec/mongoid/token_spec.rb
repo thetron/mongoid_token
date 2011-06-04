@@ -100,4 +100,10 @@ describe Mongoid::Token do
     Account.find_by_token(@account.token).id.should == @account.id
     Account.find_by_token(Account.last.token).id.should == Account.last.id
   end
+
+  it "should create a token, if the token is missing" do
+    @account.token = nil
+    @account.save!
+    @account.token.should_not be_nil
+  end
 end

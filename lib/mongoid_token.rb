@@ -13,6 +13,10 @@ module Mongoid
         set_callback(:create, :before) do |document|
           document.create_token(options[:length], options[:contains])
         end
+
+        set_callback(:save, :before) do |document|
+          document.create_token_if_nil(options[:length], options[:contains])
+        end
       end
 
       def find_by_token(token)
@@ -27,7 +31,11 @@ module Mongoid
 
       protected
       def create_token(length, characters)
-        self.token = self.generate_token(length, characters) while self.token == nil || self.class.exists?(:conditions => {:token => self.token})
+        self.token = self.generate_token(length, characters) while self.token.nil? || self.class.exists?(:conditions => {:token => self.token})
+      end
+
+      def create_token_if_nil(length, characters)
+        self.create_token(length, characters) if self.token.nil?
       end
 
       def generate_token(length, characters)
