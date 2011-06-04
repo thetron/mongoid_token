@@ -2,41 +2,47 @@ module Mongoid
   module Token
     extend ActiveSupport::Concern
 
-    included do
-
-    end
-
     module ClassMethods
       def token(*args)
         options = args.extract_options!
         options[:length] ||= 4
-        options[:with] ||= :alphanumeric
+        options[:contains] ||= :alphanumeric
 
         self.field :token, :type => String
-        self.before_create :generate_token
 
         set_callback(:create, :before) do |document|
-          document.create_token(options[:length], options[:with])
+          document.create_token(options[:length], options[:contains])
         end
+      end
+
+      def find_by_token(token)
+        self.first(:conditions => {:token => token})
       end
     end
 
     module InstanceMethods
-      def find_by_token(token)
-        self.class.where(:conditions => {:token => token}).limit(1)
-      end
-
       def to_param
         self.token
       end
 
       protected
       def create_token(length, characters)
-        self.token = generate_token(length, characters) while self.token == nil || self.class.exists?(:conditions => {:token => self.token})
+        self.token = self.generate_token(length, characters) while self.token == nil || self.class.exists?(:conditions => {:token => self.token})
       end
 
       def generate_token(length, characters)
-        ActiveSupport::SecureRandom.hex(length)[0...length]
+        case characters
+        when :alphanumeric
+          ActiveSupport::SecureRandom.hex(length)[0...length]
+        when :numeric
+          rand(10**length).to_s
+        when :fixed_numeric
+          rand(10**length).to_s.rjust(length,rand(10).to_s)
+        when :alpha
+          Array.new(length).map{['A'..'Z','a'..'z'].map{|r|r.to_a}.flatten[rand(52)]}.join
+        else
+          ActiveSupport::SecureRandom.hex(length)[0...length]
+        end
       end
     end
   end

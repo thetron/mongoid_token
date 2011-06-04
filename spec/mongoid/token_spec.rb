@@ -1,94 +1,103 @@
 require File.join(File.dirname(__FILE__), %w[.. spec_helper])
 
-class Post
+class Account
   include Mongoid::Document
-  include Mongoid::Publishable
-  field :title
+  include Mongoid::Token
+  field :name
+  token :length => 16, :contains => :fixed_numeric
 end
 
-describe Mongoid::Publishable do
+class Person
+  include Mongoid::Document
+  include Mongoid::Token
+  field :email
+  token :length => 6, :contains => :numeric
+end
+
+class Link
+  include Mongoid::Document
+  include Mongoid::Token
+
+  field :url
+  token :length => 3, :contains => :alphanumeric
+end
+
+class Video
+  include Mongoid::Document
+  include Mongoid::Token
+
+  field :name
+  token :length => 8, :contains => :alpha
+end
+
+describe Mongoid::Token do
   before :each do
-    @draft = Post.create(:published_at => nil)
-    @published = Post.create(:published_at => Time.now - 5.minutes)
-    @scheduled = Post.create(:published_at => Time.now + 12.hours)
+    @account = Account.create(:name => "Involved Pty. Ltd.")
+    @link = Link.create(:url => "http://involved.com.au")
+    @video = Video.create(:name => "Nyan nyan")
   end
 
-  it "should have a date and timestamp to represent publish state" do
-    Post.should have_field(:published_at).of_type(DateTime).with_default_value_of(nil)
-  end
-  
-  it "should be published if the published date is in the past" do
-    @published.is_draft?.should equal false
-    @published.is_published?.should equal true
-    @published.is_scheduled?.should equal false
+  it "should have a token field" do
+    @account.attributes.include?('token').should == true
+    @link.attributes.include?('token').should == true
+    @video.attributes.include?('token').should == true
   end
 
-  it "should be a draft if the published date is not set" do
-    @draft.is_draft?.should == true
-    @draft.is_published?.should == false
-    @draft.is_scheduled?.should == false
+  it "should have a token of correct length" do
+    @account.token.length.should == 16
+    @link.token.length.should == 3
+    @video.token.length.should == 8
   end
 
-  it "should be scheduled if the published date is in the future" do
-    @scheduled.is_draft?.should == false
-    @scheduled.is_published?.should == false
-    @scheduled.is_scheduled?.should == true
-  end
-
-  it "should be publishable" do
-    @draft.should respond_to :publish!
-    @draft.publish!
-    @draft.is_published?.should equal true
-    @draft.published_at.to_i.should <= Time.now.to_i
-  end
-
-  it "should be unpublishable" do
-    @published.should respond_to :unpublish!
-    @published.unpublish!
-    @published.is_draft?.should equal true
-    @published.published_at.should be nil
-  end
-
-  it "should be scheduleable" do
-    @draft.should respond_to :schedule!
-    future = (Time.now + 12.hours).to_datetime
-    @draft.schedule!(future)
-    @draft.is_scheduled?.should equal true
-    @draft.published_at.to_i.should == future.to_i
-  end
-
-  it "should return all draft models" do
-    Post.drafts.count.should equal 1
-    Post.drafts.first.should == @draft
-  end
-
-  it "should return all published models" do
-    Post.published.count.should equal 1
-    Post.published.first.should == @published
-  end
-
-  it "should return all scheduled models" do
-    Post.scheduled.count.should equal 1
-    Post.scheduled.first.should == @scheduled
-  end
-
-  it "should return published posts in descending date order" do
-    @draft.publish!
-    @scheduled.publish!
-    last_stamp = Time.now
-    Post.published.each do |post|
-      post.published_at.should <= last_stamp
-      last_stamp = post.published_at
+  it "should only generate unique tokens" do
+    1000.times do
+      @link = Link.create(:url => "http://involved.com.au")
+      Link.count(:conditions => {:token => @link.token}).should == 1
     end
   end
 
-  it "should return scheduled posts in ascending date order" do
-    @draft.schedule!(Time.now + 1.hour)
-    @published.schedule!(Time.now + 5.days)
-    last_stamp = Time.now
-    Post.scheduled.each do |post|
-      post.published_at.should > last_stamp
-      last_stamp = post.published_at
+  it "should have a token containing only the specified characters" do
+    50.times do
+      @account = Account.create(:name => "Smith & Co. LLC")
+      @person = Person.create(:email => "some_random_235@gmail.com")
+
+      @account.token.gsub(/[0-9]/, "").length.should == 0
+      @person.token.gsub(/[0-9]/, "").length.should == 0
     end
+
+    50.times do
+      @link = Link.create(:url => "http://involved.com.au")
+      @link.token.gsub(/[A-Za-z0-9]/, "").length.should == 0
+    end
+
+    50.times do
+      @video = Video.create(:name => "A test video")
+      @video.token.gsub(/[A-Za-z]/, "").length.should == 0
+    end
+  end
+
+  it "should create the only after the first save" do
+    @account = Account.new(:name => "Smith & Co. LLC")
+    @account.token.should be_nil
+    @account.save!
+    @account.token.should_not be_nil
+    initial_token = @account.token
+    @account.save!
+    initial_token.should == @account.token
+  end
+
+  it "should return the token as its parameter" do
+    @account.to_param.should == @account.token
+    @link.to_param.should == @link.token
+    @video.to_param.should == @video.token
+  end
+
+
+  it "should be finable by token" do
+    50.times do |index|
+      Account.create(:name => "A random company #{index}")
+    end
+    Account.find_by_token(@account.token).id.should == @account.id
+    Account.find_by_token(Account.last.token).id.should == Account.last.id
   end
 end
