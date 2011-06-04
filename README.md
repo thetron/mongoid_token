@@ -17,7 +17,7 @@ Into something more like this:
 
 In your gemfile, add:
 
-    gem 'mongoid_token', '1.0.0'
+    gem 'mongoid_token', '~. 0.9.0'
 
 Then update your bundle
 
