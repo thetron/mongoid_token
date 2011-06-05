@@ -9,6 +9,7 @@ module Mongoid
         options[:contains] ||= :alphanumeric
 
         self.field :token, :type => String
+        self.index :token, :unique => true
 
         set_callback(:create, :before) do |document|
           document.create_token(options[:length], options[:contains])
