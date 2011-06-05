@@ -3,6 +3,8 @@ source "http://rubygems.org"
 # Specify your gem's dependencies in mongoid_token.gemspec
 gemspec
 
+gem 'activesupport', '>= 3.0.0'
+
 group :test do
   gem 'database_cleaner'
   gem 'rspec'
