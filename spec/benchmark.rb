@@ -37,9 +37,8 @@ def create_link(token = true)
   end
 end
 
-#create_link # prime DB
 Link.destroy_all
-num_records = [1, 50, 100, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
+num_records = [1, 50, 100, 1000, 2000, 3000, 4000]
 puts "-- Alphanumeric token of length #{@token_length} (#{62**@token_length} possible tokens)"
 Benchmark.bm do |b|
   num_records.each do |qty|

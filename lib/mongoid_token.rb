@@ -7,9 +7,10 @@ module Mongoid
         options = args.extract_options!
         options[:length] ||= 4
         options[:contains] ||= :alphanumeric
+        options[:index] = true unless options.has_key?(:index)
 
         self.field :token, :type => String
-        self.index :token, :unique => true
+        self.index :token, :unique => true if options[:index]
 
         set_callback(:create, :before) do |document|
           document.create_token(options[:length], options[:contains])
