@@ -43,7 +43,7 @@ module Mongoid
       def generate_token(length, characters)
         case characters
         when :alphanumeric
-          ActiveSupport::SecureRandom.hex(length)[0...length]
+          (1..length).collect { (i = Kernel.rand(62); i += ((i < 10) ? 48 : ((i < 36) ? 55 : 61 ))).chr }.join
         when :numeric
           rand(10**length).to_s
         when :fixed_numeric
