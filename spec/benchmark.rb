@@ -14,13 +14,13 @@ DatabaseCleaner.strategy = :truncation
 
 # start benchmarks
 
-@token_length = 3
+@token_length = 7
 
 class Link
   include Mongoid::Document
   include Mongoid::Token
   field :url
-  token :length => 3, :contains => :alphanumeric
+  token :length => @token_length, :contains => :alphanumeric
   index :token, :unique => true
 end
 
@@ -38,6 +38,7 @@ def create_link(token = true)
 end
 
 Link.destroy_all
+Link.create_indexes
 num_records = [1, 50, 100, 1000, 2000, 3000, 4000]
 puts "-- Alphanumeric token of length #{@token_length} (#{62**@token_length} possible tokens)"
 Benchmark.bm do |b|
