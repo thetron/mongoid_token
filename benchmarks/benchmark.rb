@@ -14,7 +14,7 @@ DatabaseCleaner.strategy = :truncation
 
 # start benchmarks
 
-@token_length = 7
+@token_length = 5
 
 class Link
   include Mongoid::Document

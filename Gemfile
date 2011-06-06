@@ -3,14 +3,13 @@ source "http://rubygems.org"
 # Specify your gem's dependencies in mongoid_token.gemspec
 gemspec
 
-gem 'activesupport', '>= 3.0.0'
-
 group :test do
+  gem 'activesupport', '~> 3.0.0'
   gem 'database_cleaner'
-  gem 'rspec'
+  gem 'rspec', '2.5.0'
   gem 'autotest'
   gem 'autotest-growl'
-  gem 'mongoid', '~> 2.0'
+  gem 'mongoid', '2.0.0'
   gem 'bson_ext'
   gem 'mongoid-rspec'
 end

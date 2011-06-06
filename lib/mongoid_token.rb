@@ -40,7 +40,7 @@ module Mongoid
         self.create_token(length, characters) if self.token.nil?
       end
 
-      def generate_token(length, characters)
+      def generate_token(length, characters = :alphanumeric)
         case characters
         when :alphanumeric
           (1..length).collect { (i = Kernel.rand(62); i += ((i < 10) ? 48 : ((i < 36) ? 55 : 61 ))).chr }.join
@@ -50,8 +50,6 @@ module Mongoid
           rand(10**length).to_s.rjust(length,rand(10).to_s)
         when :alpha
           Array.new(length).map{['A'..'Z','a'..'z'].map{|r|r.to_a}.flatten[rand(52)]}.join
-        else
-          ActiveSupport::SecureRandom.hex(length)[0...length]
         end
       end
     end
