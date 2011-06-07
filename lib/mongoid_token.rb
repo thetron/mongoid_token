@@ -8,10 +8,10 @@ module Mongoid
         options[:length] ||= 4
         options[:retry] ||= 3
         options[:contains] ||= :alphanumeric
-        options[:index] = true unless options.has_key?(:index)
+        options[:index] = true unless options.has_key?(:index) && options[:index] == false
 
         self.field :token, :type => String
-        self.index :token, :unique => true if options[:index]
+        self.index :token, :unique => true# if options[:index]
 
         set_callback(:create, :before) do |document|
           document.create_token(options[:length], options[:contains])
@@ -35,7 +35,6 @@ module Mongoid
       protected
       def create_token(length, characters)
         self.token = self.generate_token(length, characters)# while self.token.nil? || self.class.exists?(:conditions => {:token => self.token})
-        puts self.class.find_by_token(self.token)
       end
 
       def create_token_if_nil(length, characters)
