@@ -106,4 +106,14 @@ describe Mongoid::Token do
     @account.save!
     @account.token.should_not be_nil
   end
+
+  it "should fail with an exception after 3 retries (by default)" do
+    Link.destroy_all
+    @link = Link.new(:url => "http://fail.com")
+    def @link.token_unique?
+      false
+    end
+    lambda{ @link.save! }.should raise_error(Mongoid::Token::CollisionRetriesExceeded)
+    Link.count.should == 0
+  end
 end

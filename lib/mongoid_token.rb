@@ -1,3 +1,5 @@
+require 'mongoid/token/exceptions'
+
 module Mongoid
   module Token
     extend ActiveSupport::Concern
@@ -20,6 +22,10 @@ module Mongoid
         set_callback(:save, :before) do |document|
           document.create_token_if_nil(options[:length], options[:contains])
         end
+
+        set_callback(:save, :after) do |document|
+          document.validate_token_uniqueness!(options[:length], options[:contains], options[:retry])
+        end
       end
 
       def find_by_token(token)
@@ -34,7 +40,25 @@ module Mongoid
 
       protected
       def create_token(length, characters)
-        self.token = self.generate_token(length, characters) while self.token.nil? || self.class.exists?(:conditions => {:token => self.token})
+        self.token = self.generate_token(length, characters)# while self.token.nil? || self.class.exists?(:conditions => {:token => self.token})
+      end
+
+      def validate_token_uniqueness!(length, characters, attempts)
+        @attempts_remaining ||= attempts
+        @attempts_remaining -= 1
+        unless self.token_unique?
+          if @attempts_remaining > 0
+            create_token(length, characters)
+            self.save
+          else
+            self.destroy
+            raise Mongoid::Token::CollisionRetriesExceeded.new(self, attempts)
+          end
+        end
+      end
+
+      def token_unique?
+        self.class.exists?(:conditions => {:token => self.token})
       end
 
       def create_token_if_nil(length, characters)

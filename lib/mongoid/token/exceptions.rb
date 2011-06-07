@@ -3,13 +3,13 @@ module Mongoid
     class Error < StandardError; end
 
     class CollisionRetriesExceeded < Error
-      def initialize(model, retries)
-        @model = model
-        @retries = retries
+      def initialize(resource = "unknown resource", attempts = "unspecified")
+        @resource = resource
+        @attempts = attempts
       end
 
       def to_s
-        "Failed to generate unique token for #{@model.to_s} after #{@retries} attempts."
+        "Failed to generate unique token for #{@resource} after #{@attempts} attempts."
       end
     end
   end
