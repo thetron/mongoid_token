@@ -6,6 +6,7 @@ module Mongoid
       def token(*args)
         options = args.extract_options!
         options[:length] ||= 4
+        options[:retry] ||= 3
         options[:contains] ||= :alphanumeric
         options[:index] = true unless options.has_key?(:index)
 
@@ -33,7 +34,8 @@ module Mongoid
 
       protected
       def create_token(length, characters)
-        self.token = self.generate_token(length, characters) while self.token.nil? || self.class.exists?(:conditions => {:token => self.token})
+        self.token = self.generate_token(length, characters)# while self.token.nil? || self.class.exists?(:conditions => {:token => self.token})
+        puts self.class.find_by_token(self.token)
       end
 
       def create_token_if_nil(length, characters)
