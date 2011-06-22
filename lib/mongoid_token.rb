@@ -41,17 +41,18 @@ module Mongoid
       protected
       def create_token(length, characters)
         self.token = self.generate_token(length, characters)
+        @generated_token = true
       end
 
       def validate_token_uniqueness!(length, characters, attempts)
-        attempts_remaining = attempts
-        if !defined?(@testing_uniqueness)
+        if !defined?(@testing_uniqueness) && defined?(@generated_token)
+          attempts_remaining = attempts
           @testing_uniqueness = true
           while attempts_remaining > 0 && @testing_uniqueness
             begin
               self.safely.save
               @testing_uniqueness = false
-            rescue
+            rescue Exception => e
               if defined?(Rails) && Rails.env == 'development'
                 Rails.logger.warn "[Mongoid::Token] Warning: Duplicate token found, recreating."
               end
@@ -59,10 +60,10 @@ module Mongoid
               create_token(length, characters)
             end
           end
-        end
 
-        unless attempts_remaining > 0
-          raise Mongoid::Token::CollisionRetriesExceeded.new(self, attempts) unless attempts_remaining > 0
+          unless attempts_remaining > 0
+            raise Mongoid::Token::CollisionRetriesExceeded.new(self, attempts) unless attempts_remaining > 0
+          end
         end
       end
 
