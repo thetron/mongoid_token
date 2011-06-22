@@ -40,7 +40,7 @@ module Mongoid
 
       protected
       def create_token(length, characters)
-        self.token = self.generate_token(length, characters)# while self.token.nil? || self.class.exists?(:conditions => {:token => self.token})
+        self.token = self.generate_token(length, characters)
       end
 
       def validate_token_uniqueness!(length, characters, attempts)
