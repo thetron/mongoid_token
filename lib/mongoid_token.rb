@@ -10,10 +10,10 @@ module Mongoid
         options[:length] ||= 4
         options[:retry] ||= 3
         options[:contains] ||= :alphanumeric
-        options[:index] = true unless options.has_key?(:index) && options[:index] == false
+        options[:field_name] ||= :token
 
-        self.field :token, :type => String
-        self.index :token, :unique => true if options[:index]
+        self.field options[:field_name].to_sym, :type => String
+        self.index options[:field_name].to_sym, :unique => true
 
         set_callback(:create, :before) do |document|
           document.create_token(options[:length], options[:contains])
@@ -44,16 +44,25 @@ module Mongoid
       end
 
       def validate_token_uniqueness!(length, characters, attempts)
-        @attempts_remaining ||= attempts
-        @attempts_remaining -= 1
-        unless self.token_unique?
-          if @attempts_remaining > 0
-            create_token(length, characters)
-            self.save
-          else
-            self.destroy
-            raise Mongoid::Token::CollisionRetriesExceeded.new(self, attempts)
+        attempts_remaining = attempts
+        if !defined?(@testing_uniqueness)
+          @testing_uniqueness = true
+          while attempts_remaining > 0 && @testing_uniqueness
+            begin
+              self.safely.save
+              @testing_uniqueness = false
+            rescue
+              if defined?(Rails) && Rails.env == 'development'
+                Rails.logger.warn "[Mongoid::Token] Warning: Duplicate token found, recreating."
+              end
+              attempts_remaining -= 1
+              create_token(length, characters)
+            end
           end
+        end
+
+        unless attempts_remaining > 0
+          raise Mongoid::Token::CollisionRetriesExceeded.new(self, attempts) unless attempts_remaining > 0
         end
       end
 

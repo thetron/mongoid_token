@@ -35,6 +35,10 @@ describe Mongoid::Token do
     @account = Account.create(:name => "Involved Pty. Ltd.")
     @link = Link.create(:url => "http://involved.com.au")
     @video = Video.create(:name => "Nyan nyan")
+
+    Account.create_indexes
+    Link.create_indexes
+    Video.create_indexes
   end
 
   it "should have a token field" do
@@ -50,6 +54,7 @@ describe Mongoid::Token do
   end
 
   it "should only generate unique tokens" do
+    Link.create_indexes
     1000.times do
       @link = Link.create(:url => "http://involved.com.au")
       Link.count(:conditions => {:token => @link.token}).should == 1
@@ -93,7 +98,7 @@ describe Mongoid::Token do
   end
 
 
-  it "should be finable by token" do
+  it "should be findable by token" do
     50.times do |index|
       Account.create(:name => "A random company #{index}")
     end
@@ -109,11 +114,16 @@ describe Mongoid::Token do
 
   it "should fail with an exception after 3 retries (by default)" do
     Link.destroy_all
+
+    @first_link = Link.create(:url => "http://involved.com.au")
     @link = Link.new(:url => "http://fail.com")
-    def @link.token_unique?
-      false
+    def @link.create_token(l,c) # override to always generate a duplicate
+      self.token = Link.first.token
     end
+
     lambda{ @link.save! }.should raise_error(Mongoid::Token::CollisionRetriesExceeded)
-    Link.count.should == 0
+    Link.count.should == 1
   end
+
+  it "should create unique indexes on embedded documents"
 end
