@@ -17,7 +17,7 @@ Into something more like this:
 
 In your gemfile, add:
 
-    gem 'mongoid_token', '~> 0.9.1'
+    gem 'mongoid_token', '~> 1.0.0'
 
 Then update your bundle
 
@@ -43,10 +43,17 @@ end
 Obviously, this will create tokens of 8 characters long - make them as
 short or as long as you require.
 
+__Note:__ Mongoid::Token leverages Mongoid's 'safe mode' by
+automatically creating a unique index on your documents using the token
+field. In order to take advantage of this feature (and ensure that your
+documents always have unique tokens) remember to create your indexes.
+
+See 'Token collision/duplicate prevention' below for more details.
+
 
 ## Options
 
-The `token` method takes two options: `length`, which determines the
+The `token` method has a couple of key options: `length`, which determines the
 length (or maximum length, in some cases) and `contains`, which tells
 Mongoid::Token which characters to use when generating the token.
 
@@ -57,6 +64,11 @@ The options for `contains` are as follows:
 * `:numeric` - numbers only, anything from 1 character long, up to and
   `length`
 * `:fixed_numeric` - numbers only, but with the number of characters always the same as `length`
+
+You can also rename the token field, if required, using the
+`:field_name` option:
+
+* `token :contains => :numeric, :field_name => :purchase_order_number`
 
 ### Examples:
 
@@ -84,7 +96,34 @@ tokens to - all you need to do is save each of your models and they will
 be assigned a token, if it's missing.
 
 
+## Token collision/duplicate prevention
+
+Mongoid::Token leverages Mongoid's 'safe mode' by
+automatically creating a unique index on your documents using the token
+field. In order to take advantage of this feature (and ensure that your
+documents always have unique tokens) remember to create your indexes.
+
+You can read more about indexes in the [Mongoid docs](http://mongoid.org/docs/indexing.html).
+
+Additionally, Mongoid::Token will attempt to create a token 3 times
+before eventually giving up and raising a
+`Mongoid::Token::CollisionRetriesExceeded` exception. To take advantage
+of this, one must set `persist_in_safe_mode = true` in your Mongoid
+configuration.
+
+The number of retry attempts is adjustable in the `token` method using the
+`:retry` options. Set it to zero to turn off retrying.
+
+* `token :length => 6, :retry => 4` Will retry token generation 4
+times before bailing out
+* `token :length => 3, :retry => 0` Retrying disabled
+
+
 # Notes
 
 If you find a problem, please [submit an issue](http://github.com/thetron/mongoid_token/issues) (and a failing test, if
-you can). Pull requests and feature requests are always welcome.
+you can). Pull requests and feature requests are always welcome and
+greatly appreciated.
+
+Thanks to everyone that has contributed to this gem over the past year,
+in particular [eagleas](https://github.com/eagleas) and [jamesotron](https://github.com/jamesotron).
