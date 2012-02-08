@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.email       = ["nicholas@bruning.com.au"]
   s.homepage    = "http://github.com/thetron/mongoid_token"
   s.summary     = %q{A little random, unique token generator for Mongoid documents.}
-  s.description = %q{Mongoid token is a gem for creating random, unique tokens for mongoid documents, when you want shorter URLs.}
+  s.description = %q{Mongoid token is a gem for creating random, unique tokens for mongoid documents. Highly configurable and great for making URLs a little more compact.}
 
   s.rubyforge_project = "mongoid_token"
   s.add_dependency 'activesupport', '>= 3.0'
