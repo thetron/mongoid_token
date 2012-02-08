@@ -34,7 +34,7 @@ class Video
   include Mongoid::Token
 
   field :name
-  token :length => 8, :contains => :alpha
+  token :length => 8, :contains => :alpha, :field_name => :vid
 end
 
 class Node
@@ -63,19 +63,21 @@ describe Mongoid::Token do
 
     Account.create_indexes
     Link.create_indexes
+    FailLink.create_indexes
     Video.create_indexes
+    Node.create_indexes
   end
 
   it "should have a token field" do
     @account.attributes.include?('token').should == true
     @link.attributes.include?('token').should == true
-    @video.attributes.include?('token').should == true
+    @video.attributes.include?('vid').should == true
   end
 
   it "should have a token of correct length" do
     @account.token.length.should == 16
     @link.token.length.should == 3
-    @video.token.length.should == 8
+    @video.vid.length.should == 8
   end
 
   it "should only generate unique tokens" do
@@ -100,9 +102,9 @@ describe Mongoid::Token do
       @link.token.gsub(/[A-Za-z0-9]/, "").length.should == 0
     end
 
-    50.times do
+    50.times do |index|
       @video = Video.create(:name => "A test video")
-      @video.token.gsub(/[A-Za-z]/, "").length.should == 0
+      @video.vid.gsub(/[A-Za-z]/, "").length.should == 0
     end
   end
 
@@ -119,7 +121,7 @@ describe Mongoid::Token do
   it "should return the token as its parameter" do
     @account.to_param.should == @account.token
     @link.to_param.should == @link.token
-    @video.to_param.should == @video.token
+    @video.to_param.should == @video.vid
   end
 
 
@@ -129,6 +131,12 @@ describe Mongoid::Token do
     end
     Account.find_by_token(@account.token).id.should == @account.id
     Account.find_by_token(Account.last.token).id.should == Account.last.id
+
+    10.times do |index|
+      Video.create(:name => "Lord of the Rings, Super Special Edition part #{index}")
+    end
+    Video.find_by_token(@video.vid).id.should == @video.id
+    Video.find_by_token(Video.last.vid).id.should == Video.last.id
   end
 
   it "should create a token, if the token is missing" do
