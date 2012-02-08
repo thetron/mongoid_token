@@ -126,4 +126,4 @@ you can). Pull requests and feature requests are always welcome and
 greatly appreciated.
 
 Thanks to everyone that has contributed to this gem over the past year,
-in particular [eagleas](https://github.com/eagleas) and [jamesotron](https://github.com/jamesotron).
+in particular [eagleas](https://github.com/eagleas) and [jamesotron](https://github.com/jamesotron). Many, many thanks guys.
