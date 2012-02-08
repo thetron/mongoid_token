@@ -1,5 +1,7 @@
 # Mongoid::Token - Short snappy tokens for Mongoid documents
 
+[![Build Status](https://secure.travis-ci.org/thetron/mongoid_token.png)](http://travis-ci.org/thetron/mongoid_token)
+
 This library is a quick and simple way to generate unique, random tokens
 for your mongoid documents, in the cases where you can't, or don't want
 to use slugs, or the default MongoDB IDs.
