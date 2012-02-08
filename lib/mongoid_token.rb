@@ -52,7 +52,7 @@ module Mongoid
           retry
         else
           Rails.logger.warn "[Mongoid::Token] Warning: Maximum to generation retries (#{@max_collision_retries}) exceeded." if defined?(Rails) && Rails.env == 'development'
-          raise Mongoid::Token::CollisionRetriesExceeded.new(self, 1)
+          raise Mongoid::Token::CollisionRetriesExceeded.new(self, @max_collision_retries)
         end
       end
     end
@@ -66,7 +66,7 @@ module Mongoid
           retry
         else
           Rails.logger.warn "[Mongoid::Token] Warning: Maximum to generation retries (#{@max_collision_retries}) exceeded." if defined?(Rails) && Rails.env == 'development'
-          raise Mongoid::Token::CollisionRetriesExceeded.new(self, 1)
+          raise Mongoid::Token::CollisionRetriesExceeded.new(self, @max_collision_retries)
         end
       end
     end
