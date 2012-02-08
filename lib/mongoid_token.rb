@@ -14,6 +14,7 @@ module Mongoid
 
         self.field options[:field_name].to_sym, :type => String
         self.index options[:field_name].to_sym, :unique => true
+        # should validate token presence? Should this be enforced?
 
         set_callback(:create, :before) do |document|
           document.create_token(options[:length], options[:contains])
@@ -23,8 +24,12 @@ module Mongoid
           document.create_token_if_nil(options[:length], options[:contains])
         end
 
-        set_callback(:save, :after) do |document|
-          document.validate_token_uniqueness!(options[:length], options[:contains], options[:retry])
+        after_initialize do # set_callback did not work with after_initialize callback
+          self.instance_variable_set :@max_collision_retries, options[:retry]
+        end
+        if options[:retry] > 0
+          alias_method_chain :save, :safety
+          alias_method_chain :save!, :safety
         end
       end
 
@@ -38,36 +43,36 @@ module Mongoid
     end
 
     protected
-    def create_token(length, characters)
-      self.token = self.generate_token(length, characters)
-      @generated_token = true
-    end
-
-    def validate_token_uniqueness!(length, characters, attempts)
-      if !defined?(@testing_uniqueness) && defined?(@generated_token)
-        attempts_remaining = attempts
-        @testing_uniqueness = true
-        while attempts_remaining > 0 && @testing_uniqueness
-          begin
-            self.safely.save
-            @testing_uniqueness = false
-          rescue Exception => e
-            if defined?(Rails) && Rails.env == 'development'
-              Rails.logger.warn "[Mongoid::Token] Warning: Duplicate token found, recreating."
-            end
-            attempts_remaining -= 1
-            create_token(length, characters)
-          end
-        end
-
-        unless attempts_remaining > 0
-          raise Mongoid::Token::CollisionRetriesExceeded.new(self, attempts) unless attempts_remaining > 0
+    def save_with_safety(args = {}, &block)
+      retries = @max_collision_retries
+      begin
+        safely.save_without_safety(args, &block)
+      rescue Mongo::OperationFailure => e
+        if (retries -= 1) > 0
+          retry
+        else
+          Rails.logger.warn "[Mongoid::Token] Warning: Maximum to generation retries (#{@max_collision_retries}) exceeded." if defined?(Rails) && Rails.env == 'development'
+          raise Mongoid::Token::CollisionRetriesExceeded.new(self, 1)
         end
       end
     end
 
-    def token_unique?
-      self.class.exists?(:conditions => {:token => self.token})
+    def save_with_safety!(args = {}, &block)
+      retries = @max_collision_retries
+      begin
+        safely.save_without_safety!(args, &block)
+      rescue Mongo::OperationFailure => e
+        if (retries -= 1) > 0
+          retry
+        else
+          Rails.logger.warn "[Mongoid::Token] Warning: Maximum to generation retries (#{@max_collision_retries}) exceeded." if defined?(Rails) && Rails.env == 'development'
+          raise Mongoid::Token::CollisionRetriesExceeded.new(self, 1)
+        end
+      end
+    end
+
+    def create_token(length, characters)
+      self.token = self.generate_token(length, characters)
     end
 
     def create_token_if_nil(length, characters)

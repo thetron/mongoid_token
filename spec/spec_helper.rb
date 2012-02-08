@@ -19,5 +19,7 @@ end
 
 Mongoid.configure do |config|
   config.master = Mongo::Connection.new.db("mongoid_token_test")
+  config.autocreate_indexes = true
+  config.persist_in_safe_mode = true
 end
 

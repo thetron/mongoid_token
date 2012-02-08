@@ -22,12 +22,37 @@ class Link
   token :length => 3, :contains => :alphanumeric
 end
 
+class FailLink
+  include Mongoid::Document
+  include Mongoid::Token
+  field :url
+  token :length => 3, :contains => :alphanumeric, :retry => 0
+end
+
 class Video
   include Mongoid::Document
   include Mongoid::Token
 
   field :name
   token :length => 8, :contains => :alpha
+end
+
+class Node
+  include Mongoid::Document
+  include Mongoid::Token
+
+  field :name
+  token :length => 8, :contains => :fixed_numeric
+
+  embedded_in :cluster
+end
+
+class Cluster
+  include Mongoid::Document
+
+  field :name
+
+  embeds_many :nodes
 end
 
 describe Mongoid::Token do
@@ -114,16 +139,43 @@ describe Mongoid::Token do
 
   it "should fail with an exception after 3 retries (by default)" do
     Link.destroy_all
+    Link.create_indexes
 
     @first_link = Link.create(:url => "http://involved.com.au")
     @link = Link.new(:url => "http://fail.com")
     def @link.create_token(l,c) # override to always generate a duplicate
+      super
       self.token = Link.first.token
     end
 
-    lambda{ @link.save! }.should raise_error(Mongoid::Token::CollisionRetriesExceeded)
+    lambda{ @link.save }.should raise_error(Mongoid::Token::CollisionRetriesExceeded)
     Link.count.should == 1
+    Link.where(:token => @first_link.token).count.should == 1
   end
 
-  it "should create unique indexes on embedded documents"
+  it "should not raise a custom exception if retries are set to zero" do
+    FailLink.destroy_all
+    FailLink.create_indexes
+
+    @first_link = FailLink.create(:url => "http://involved.com.au")
+    @link = FailLink.new(:url => "http://fail.com")
+    def @link.create_token(l,c) # override to always generate a duplicate
+      super
+      self.token = FailLink.first.token
+    end
+
+    lambda{ @link.save }.should_not raise_error(Mongoid::Token::CollisionRetriesExceeded)
+  end
+
+  it "should create unique indexes on embedded documents" do
+    @cluster = Cluster.new(:name => "CLUSTER_001")
+    5.times do |index|
+      @cluster.nodes.create!(:name => "NODE_#{index.to_s.rjust(3, '0')}")
+    end
+
+    @cluster.nodes.each do |node|
+      node.attributes.include?('token').should == true
+      node.token.match(/[0-9]{8}/).should_not == nil
+    end
+  end
 end

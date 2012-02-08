@@ -4,7 +4,7 @@ source "http://rubygems.org"
 gemspec
 
 group :test do
-  gem 'activesupport', '~> 3.0.0'
+  gem 'activesupport', '~> 3.0'
   gem 'database_cleaner'
   gem 'rspec', '2.5.0'
   gem 'autotest'
