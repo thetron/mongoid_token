@@ -8,11 +8,11 @@ to use slugs, or the default MongoDB IDs.
 
 Mongoid::Token can help turn this:
 
-    http://bestwebappever.com/video/4dcfbb3c6a4f1d4c4a000012/edit
+    http://myawesomewebapp.com/video/4dcfbb3c6a4f1d4c4a000012/edit
 
 Into something more like this:
 
-    http://bestwebappever.com/video/83xQ3r/edit
+    http://myawesomewebapp.com/video/83xQ3r/edit
 
 
 ## Getting started
