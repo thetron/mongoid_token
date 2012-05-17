@@ -32,8 +32,8 @@ module Mongoid
         end
 
         if options[:retry] > 0
-          alias_method_chain :save, :safety
-          alias_method_chain :save!, :safety
+          alias_method_chain :insert, :safety
+          alias_method_chain :upsert, :safety
         end
 
         self.class_variable_set :@@token_field_name, options[:field_name]
@@ -50,11 +50,12 @@ module Mongoid
     end
 
     protected
-    def save_with_safety(args = {}, &block)
+
+    def insert_with_safety(options = {})
       retries = @max_collision_retries
       begin
        # puts "Attempt: #{retries}"
-        safely.save_without_safety(args, &block)
+        safely.insert_without_safety(options)
       rescue Mongo::OperationFailure => e
         if (retries -= 1) > 0
           self.create_token(@token_length, @token_contains)
@@ -66,11 +67,11 @@ module Mongoid
       end
     end
 
-    def save_with_safety!(args = {}, &block)
+    def upsert_with_safety(options)
       retries = @max_collision_retries
       begin
         #puts "Attempt: #{retries}"
-        safely.save_without_safety!(args, &block)
+        safely.upsert_without_safety(options)
       rescue Mongo::OperationFailure => e
         if (retries -= 1) > 0
           self.create_token(@token_length, @token_contains)
