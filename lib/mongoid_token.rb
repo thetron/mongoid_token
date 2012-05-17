@@ -71,7 +71,7 @@ module Mongoid
       resolve_token_collisions { safely.insert_without_safety(options) }
     end
 
-    def upsert_with_safety(options)
+    def upsert_with_safety(options = {})
       resolve_token_collisions { safely.upsert_without_safety(options) }
     end
 
