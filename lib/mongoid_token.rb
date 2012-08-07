@@ -58,10 +58,8 @@ module Mongoid
     def resolve_token_collisions
       retries = @max_collision_retries
       begin
-        # puts "Attempt: #{retries}"
         yield
       rescue Moped::Errors::OperationFailure => e
-        puts e
         if (retries -= 1) > 0
           self.create_token(@token_length, @token_contains)
           retry
@@ -82,7 +80,6 @@ module Mongoid
 
     def create_token(length, characters)
       self.send(:"#{@token_field_name}=", self.generate_token(length, characters))
-      #puts "Set #{@token_field_name.to_s} to #{self.send(@token_field_name.to_sym)}"
     end
 
     def create_token_if_nil(length, characters)

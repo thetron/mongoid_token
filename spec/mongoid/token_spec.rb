@@ -150,13 +150,12 @@ describe Mongoid::Token do
     Link.create_indexes
 
     @first_link = Link.create(:url => "http://involved.com.au")
+    Link.any_instance.stub(:generate_token).and_return(@first_link.token)
     @link = Link.new(:url => "http://fail.com")
-    def @link.create_token(l,c) # override to always generate a duplicate
-      super
-      self.token = Link.first.token
-    end
 
-    lambda{ @link.save }.should raise_error(Mongoid::Token::CollisionRetriesExceeded)
+    #lambda{ @link.save! }.should raise_error(Mongoid::Token::CollisionRetriesExceeded)
+    expect { @link.save! }.to raise_error(Mongoid::Token::CollisionRetriesExceeded)
+
     Link.count.should == 1
     Link.where(:token => @first_link.token).count.should == 1
   end
@@ -175,17 +174,14 @@ describe Mongoid::Token do
     FailLink.create_indexes
 
     @first_link = FailLink.create(:url => "http://involved.com.au")
+    Link.any_instance.stub(:generate_token).and_return(@first_link.token)
     @link = FailLink.new(:url => "http://fail.com")
-    def @link.create_token(l,c) # override to always generate a duplicate
-      super
-      self.token = FailLink.first.token
-    end
 
     lambda{ @link.save }.should_not raise_error(Mongoid::Token::CollisionRetriesExceeded)
   end
 
   it "should create unique indexes on embedded documents" do
-    @cluster = Cluster.new(:name => "CLUSTER_001")
+    @cluster = Cluster.create(:name => "CLUSTER_001")
     5.times do |index|
       @cluster.nodes.create!(:name => "NODE_#{index.to_s.rjust(3, '0')}")
     end
