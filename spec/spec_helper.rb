@@ -16,12 +16,7 @@ RSpec.configure do |config|
 
   config.after(:each) do
     DatabaseCleaner.clean
-
-    # Added dropping collection to ensure indexes are removed
-    Mongoid.master.collections.select do |collection|
-      include = collection.name !~ /system/
-      include
-    end.each(&:drop)
+    Mongoid.purge!
   end
 end
 

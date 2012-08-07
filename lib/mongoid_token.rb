@@ -45,7 +45,7 @@ module Mongoid
 
       def find_by_token(token)
         field_name = self.class_variable_get :@@token_field_name
-        self.first(:conditions => {field_name.to_sym => token})
+        self.limit(1).where({field_name.to_sym => token}).first
       end
     end
 
@@ -60,7 +60,8 @@ module Mongoid
       begin
         # puts "Attempt: #{retries}"
         yield
-      rescue Mongo::OperationFailure => e
+      rescue Moped::Errors::OperationFailure => e
+        puts e
         if (retries -= 1) > 0
           self.create_token(@token_length, @token_contains)
           retry
@@ -72,11 +73,11 @@ module Mongoid
     end
 
     def insert_with_safety(options = {})
-      resolve_token_collisions { safely.insert_without_safety(options) }
+      resolve_token_collisions { with(:safe => true).insert_without_safety(options) }
     end
 
     def upsert_with_safety(options = {})
-      resolve_token_collisions { safely.upsert_without_safety(options) }
+      resolve_token_collisions { with(:safe => true).upsert_without_safety(options) }
     end
 
     def create_token(length, characters)

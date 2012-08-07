@@ -84,7 +84,7 @@ describe Mongoid::Token do
     Link.create_indexes
     1000.times do
       @link = Link.create(:url => "http://involved.com.au")
-      Link.count(:conditions => {:token => @link.token}).should == 1
+      Link.where(:token => @link.token).count.should == 1
     end
   end
 
