@@ -161,6 +161,15 @@ describe Mongoid::Token do
     Link.where(:token => @first_link.token).count.should == 1
   end
 
+  it "tries to resolve collisions when instantiated with create!" do
+    link = Link.create!(url: "http://example.com/1")
+
+    Link.any_instance.stub(:generate_token).and_return(link.token)
+
+    expect { Link.create!(url: "http://example.com/2") }
+    .to raise_error(Mongoid::Token::CollisionRetriesExceeded)
+  end
+
   it "should not raise a custom exception if retries are set to zero" do
     FailLink.destroy_all
     FailLink.create_indexes
