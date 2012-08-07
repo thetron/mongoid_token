@@ -14,7 +14,7 @@ module Mongoid
         #options[:key] ||= false
 
         self.field options[:field_name].to_sym, :type => String
-        self.index options[:field_name].to_sym, :unique => true
+        self.index({ options[:field_name].to_sym => 1 }, { :unique => true })
 
         #if options[:key]
         #  self.key options[:field_name].to_sym
