@@ -11,10 +11,14 @@ module Mongoid
         options[:retry] ||= 3
         options[:contains] ||= :alphanumeric
         options[:field_name] ||= :token
+        #options[:key] ||= false
 
         self.field options[:field_name].to_sym, :type => String
         self.index options[:field_name].to_sym, :unique => true
-        # should validate token presence? Should this be enforced?
+
+        #if options[:key]
+        #  self.key options[:field_name].to_sym
+        #end
 
         set_callback(:create, :before) do |document|
           document.create_token(options[:length], options[:contains])
