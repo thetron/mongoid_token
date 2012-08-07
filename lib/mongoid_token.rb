@@ -45,7 +45,7 @@ module Mongoid
 
       def find_by_token(token)
         field_name = self.class_variable_get :@@token_field_name
-        self.limit(1).where({field_name.to_sym => token}).first
+        self.find_by(field_name.to_sym => token)
       end
     end
 
