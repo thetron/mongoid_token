@@ -15,11 +15,19 @@ Into something more like this:
     http://myawesomewebapp.com/video/83xQ3r/edit
 
 
+## Mongoid 3.x Support
+
+As of version 1.1.0, Mongoid::Token now supports Mongoid 3.x.
+
+> If you still require __Mongoid 2.x__ support, please install
+> Mongoid::Token 1.0.0.
+
+
 ## Getting started
 
 In your gemfile, add:
 
-    gem 'mongoid_token', '~> 1.0.0'
+    gem 'mongoid_token', '~> 1.1.0'
 
 Then update your bundle
 
