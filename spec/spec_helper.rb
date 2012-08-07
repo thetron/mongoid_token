@@ -6,6 +6,8 @@ require 'mongoid-rspec'
 require 'mongoid_token'
 require 'mongoid/token/exceptions'
 
+ENV['MONGOID_ENV'] = "test"
+
 RSpec.configure do |config|
   config.include Mongoid::Matchers
   config.before(:suite) do
@@ -23,9 +25,4 @@ RSpec.configure do |config|
   end
 end
 
-Mongoid.configure do |config|
-  config.master = Mongo::Connection.new.db("mongoid_token_test")
-  config.autocreate_indexes = true
-  config.persist_in_safe_mode = true
-end
-
+Mongoid.load!( File.join(File.dirname(__FILE__), 'mongoid.yml') )
