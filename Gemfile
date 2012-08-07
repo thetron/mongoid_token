@@ -1,6 +1,5 @@
 source "http://rubygems.org"
 
-# Specify your gem's dependencies in mongoid_token.gemspec
 gemspec
 
 group :test do
