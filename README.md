@@ -71,6 +71,7 @@ The options for `contains` are as follows:
 
 * `:alphanumeric` - letters (upper and lowercase) and numbers
 * `:alpha` - letters (upper and lowercase) only
+* `:alpha_lower` - letters (lowercase) only
 * `:numeric` - numbers only, anything from 1 character long, up to and
   `length`
 * `:fixed_numeric` - numbers only, but with the number of characters always the same as `length`
