@@ -94,6 +94,8 @@ module Mongoid
         rand(10**length).to_s
       when :fixed_numeric
         rand(10**length).to_s.rjust(length,rand(10).to_s)
+      when :fixed_numeric_not_null
+        (rand(10**length - 10**(length-1)) + 10**(length-1)).to_s
       when :alpha
         Array.new(length).map{['A'..'Z','a'..'z'].map{|r|r.to_a}.flatten[rand(52)]}.join
       end

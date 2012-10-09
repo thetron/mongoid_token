@@ -37,6 +37,14 @@ class Video
   token :length => 8, :contains => :alpha, :field_name => :vid
 end
 
+class Image
+  include Mongoid::Document
+  include Mongoid::Token
+
+  field :url
+  token :length => 8, :contains => :fixed_numeric_not_null
+end
+
 class Node
   include Mongoid::Document
   include Mongoid::Token
@@ -60,11 +68,13 @@ describe Mongoid::Token do
     @account = Account.create(:name => "Involved Pty. Ltd.")
     @link = Link.create(:url => "http://involved.com.au")
     @video = Video.create(:name => "Nyan nyan")
+    @image = Image.create(:url => "http://involved.com.au/image.png")
 
     Account.create_indexes
     Link.create_indexes
     FailLink.create_indexes
     Video.create_indexes
+    Image.create_indexes
     Node.create_indexes
   end
 
@@ -78,6 +88,7 @@ describe Mongoid::Token do
     @account.token.length.should == 16
     @link.token.length.should == 3
     @video.vid.length.should == 8
+    @image.token.length.should == 8
   end
 
   it "should only generate unique tokens" do
@@ -189,6 +200,15 @@ describe Mongoid::Token do
     @cluster.nodes.each do |node|
       node.attributes.include?('token').should == true
       node.token.match(/[0-9]{8}/).should_not == nil
+    end
+  end
+
+  describe "with :fixed_numeric_not_null" do
+    it "should not start with 0" do
+      1000.times do
+        image = Image.create(:url => "something")
+        image.token.should_not start_with "0"
+      end
     end
   end
 end
