@@ -11,6 +11,7 @@ module Mongoid
         options[:retry] ||= 3
         options[:contains] ||= :alphanumeric
         options[:field_name] ||= :token
+        options[:to_param] ||= false
         #options[:key] ||= false
 
         self.field options[:field_name].to_sym, :type => String
@@ -33,6 +34,7 @@ module Mongoid
           self.instance_variable_set :@token_field_name, options[:field_name]
           self.instance_variable_set :@token_length, options[:length]
           self.instance_variable_set :@token_contains, options[:contains]
+          self.instance_variable_set :@token_to_param, options[:to_param]
         end
 
         if options[:retry] > 0
@@ -50,7 +52,11 @@ module Mongoid
     end
 
     def to_param
-      self.send(@token_field_name.to_sym)
+      if @token_to_param
+        self.send(@token_field_name.to_sym)
+      else
+        super
+      end
     end
 
     protected
