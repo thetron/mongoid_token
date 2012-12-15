@@ -1,4 +1,5 @@
 require 'mongoid/token/exceptions'
+require 'yab62'
 
 module Mongoid
   module Token
@@ -89,7 +90,7 @@ module Mongoid
     def generate_token(length, characters = :alphanumeric)
       case characters
       when :alphanumeric
-        (1..length).collect { (i = Kernel.rand(62); i += ((i < 10) ? 48 : ((i < 36) ? 55 : 61 ))).chr }.join
+        (rand(62**length)).encode62.rjust(length,rand(62).encode62)
       when :numeric
         rand(10**length).to_s
       when :fixed_numeric
