@@ -80,6 +80,12 @@ You can also rename the token field, if required, using the
 
 * `token :contains => :numeric, :field_name => :purchase_order_number`
 
+You can also set the `:to_param` option:
+
+* `token :contains => :numeric, :to_param => true`
+
+In this case, when you call `person_url(@person)`, the `token` is used.
+
 ### Examples:
 
 * `token :length => 8, :contains => :alphanumeric` generates something like `8Sdc98dQ`
