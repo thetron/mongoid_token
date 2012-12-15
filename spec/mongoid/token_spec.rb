@@ -4,7 +4,7 @@ class Account
   include Mongoid::Document
   include Mongoid::Token
   field :name
-  token :length => 16, :contains => :fixed_numeric
+  token :length => 16, :contains => :fixed_numeric, :to_param => true
 end
 
 class Person
@@ -19,7 +19,7 @@ class Link
   include Mongoid::Token
 
   field :url
-  token :length => 3, :contains => :alphanumeric
+  token :length => 3, :contains => :alphanumeric, :to_param => true
 end
 
 class FailLink
@@ -118,12 +118,14 @@ describe Mongoid::Token do
     initial_token.should == @account.token
   end
 
-  it "should return the token as its parameter" do
+  it "should return the token as its parameter if to_param is true" do
     @account.to_param.should == @account.token
     @link.to_param.should == @link.token
-    @video.to_param.should == @video.vid
   end
 
+  it "should return the id as its parameter by default" do
+    @video.to_param.should == @video.id.to_s
+  end
 
   it "should be findable by token" do
     50.times do |index|
