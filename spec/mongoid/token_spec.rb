@@ -20,6 +20,8 @@ class Link
 
   field :url
   token :length => 3, :contains => :alphanumeric
+
+  validates :url, :presence => true
 end
 
 class FailLink
@@ -145,7 +147,7 @@ describe Mongoid::Token do
     @account.token.should_not be_nil
   end
 
-  it "should fail with an exception after 3 retries (by default)" do
+  it "should fail with an exception after 3 retries" do
     Link.destroy_all
     Link.create_indexes
 
@@ -153,7 +155,6 @@ describe Mongoid::Token do
     Link.any_instance.stub(:generate_token).and_return(@first_link.token)
     @link = Link.new(:url => "http://fail.com")
 
-    #lambda{ @link.save! }.should raise_error(Mongoid::Token::CollisionRetriesExceeded)
     expect { @link.save! }.to raise_error(Mongoid::Token::CollisionRetriesExceeded)
 
     Link.count.should == 1
@@ -165,8 +166,13 @@ describe Mongoid::Token do
 
     Link.any_instance.stub(:generate_token).and_return(link.token)
 
-    expect { Link.create!(url: "http://example.com/2") }
-    .to raise_error(Mongoid::Token::CollisionRetriesExceeded)
+    expect { Link.create!(url: "http://example.com/2") }.to raise_error(Mongoid::Token::CollisionRetriesExceeded)
+  end
+
+  it "should not raise a custom error if an operation failure is thrown for another reason" do
+    link = Link.new
+    lambda{ link.save! }.should_not raise_error(Mongoid::Token::CollisionRetriesExceeded)
+    link.valid?.should == false
   end
 
   it "should not raise a custom exception if retries are set to zero" do
@@ -177,7 +183,7 @@ describe Mongoid::Token do
     Link.any_instance.stub(:generate_token).and_return(@first_link.token)
     @link = FailLink.new(:url => "http://fail.com")
 
-    lambda{ @link.save }.should_not raise_error(Mongoid::Token::CollisionRetriesExceeded)
+    lambda{ @link.save! }.should_not raise_error(Mongoid::Token::CollisionRetriesExceeded)
   end
 
   it "should create unique indexes on embedded documents" do
