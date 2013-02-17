@@ -50,7 +50,7 @@ module Mongoid
     end
 
     def to_param
-      self.send(@token_field_name.to_sym)
+      self.send(@token_field_name.to_sym) || super
     end
 
     protected
