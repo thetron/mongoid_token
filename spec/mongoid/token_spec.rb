@@ -44,7 +44,7 @@ class Image
   include Mongoid::Token
 
   field :url
-  token :length => 8, :contains => :fixed_numeric_not_null
+  token :length => 8, :contains => :fixed_numeric_no_leading_zeros
 end
 
 class Node
@@ -212,7 +212,7 @@ describe Mongoid::Token do
   describe "with :fixed_numeric_not_null" do
     it "should not start with 0" do
       1000.times do
-        image = Image.create(:url => "something")
+        image = Image.create(:url => "http://something.com/image.png")
         image.token.should_not start_with "0"
       end
     end
