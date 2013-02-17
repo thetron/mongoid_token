@@ -147,6 +147,7 @@ Many, many thanks - you guys rawk.
 
 ## Contributors:
 
+* [olliem](https://github.com/olliem)
 * [msolli](https://github.com/msolli)
 * [siong1987](https://github.com/siong1987)
 * [stephan778](https://github.com/stephan778) 
