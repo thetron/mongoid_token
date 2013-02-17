@@ -108,6 +108,8 @@ module Mongoid
         Array.new(length).map{['A'..'Z','a'..'z'].map{|r|r.to_a}.flatten[rand(52)]}.join
       when :alpha_lower
         Array.new(length).map{['a'..'z'].map{|r|r.to_a}.flatten[rand(26)]}.join
+      when :alpha_upper
+        Array.new(length).map{['A'..'Z'].map{|r|r.to_a}.flatten[rand(26)]}.join
       end
     end
   end
