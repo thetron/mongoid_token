@@ -57,9 +57,15 @@ module Mongoid
 
     def resolve_token_collisions
       retries = @max_collision_retries
+
       begin
         yield
       rescue Moped::Errors::OperationFailure => e
+        # This is horrible, but seems to be the only way to get the details of the exception?
+        continue unless [11000, 11001].include?(e.details['code'])
+        continue unless   e.details['err'] =~ /dup key/ &&
+                          e.details['err'] =~ /"#{self.send(@token_field_name.to_sym)}"/
+
         if (retries -= 1) > 0
           self.create_token(@token_length, @token_contains)
           retry
@@ -83,7 +89,9 @@ module Mongoid
     end
 
     def create_token_if_nil(length, characters)
-      self.create_token(length, characters) if self[@token_field_name.to_sym].nil?
+      if self[@token_field_name.to_sym].blank?
+        self.create_token(length, characters) 
+      end
     end
 
     def generate_token(length, characters = :alphanumeric)
