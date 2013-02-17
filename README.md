@@ -71,10 +71,12 @@ The options for `contains` are as follows:
 
 * `:alphanumeric` - letters (upper and lowercase) and numbers
 * `:alpha` - letters (upper and lowercase) only
+* `:alpha_lower` - letters (lowercase) only
+* `:alpha_upper` - letters (uppercase) only
 * `:numeric` - numbers only, anything from 1 character long, up to and
   `length`
 * `:fixed_numeric` - numbers only, but with the number of characters always the same as `length`
-* :fixed_numeric_no_leading_zeros - as above, but will never start with
+* `:fixed_numeric_no_leading_zeros` - as above, but will never start with
 zeros
 
 You can also rename the token field, if required, using the
@@ -87,12 +89,13 @@ You can also rename the token field, if required, using the
 * `token :length => 8, :contains => :alphanumeric` generates something like `8Sdc98dQ`
 * `token :length => 5, :contains => :alpha` gereates something like
   `ASlkj`
+* token :length 
 * `token :length => 4, :contains => :numeric` could generate anything
   from `0` upto `9999` - but in a random order
 * `token :length => 4, :contains => :fixed_numeric` will generate
   anything from `0000` to `9999` in a random order
-* token :length => 4, :contains => :fixed_numeric_no_leading_zeros will
-generate anything from 1000 to 9999 in a random order
+* `token :length => 4, :contains => :fixed_numeric_no_leading_zeros` will
+generate anything from `1000` to `9999` in a random order
 
 
 ## Finders
