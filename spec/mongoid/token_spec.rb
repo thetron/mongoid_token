@@ -47,6 +47,14 @@ class Image
   token :length => 8, :contains => :fixed_numeric_no_leading_zeros
 end
 
+class Event
+  include Mongoid::Document
+  include Mongoid::Token
+
+  field :name
+  token :length => 8, :contains => :alpha_lower
+end
+
 class Node
   include Mongoid::Document
   include Mongoid::Token
@@ -71,12 +79,14 @@ describe Mongoid::Token do
     @link = Link.create(:url => "http://involved.com.au")
     @video = Video.create(:name => "Nyan nyan")
     @image = Image.create(:url => "http://involved.com.au/image.png")
+    @event = Event.create(:name => "Super cool party!")
 
     Account.create_indexes
     Link.create_indexes
     FailLink.create_indexes
     Video.create_indexes
     Image.create_indexes
+    Event.create_indexes
     Node.create_indexes
   end
 
@@ -118,6 +128,11 @@ describe Mongoid::Token do
     50.times do |index|
       @video = Video.create(:name => "A test video")
       @video.vid.gsub(/[A-Za-z]/, "").length.should == 0
+    end
+    
+    50.times do |index|
+      @event = Event.create(:name => "Super cool party!2")
+      @event.token.gsub(/[a-z]/, "").length.should == 0
     end
   end
 
