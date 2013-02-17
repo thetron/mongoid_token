@@ -139,5 +139,13 @@ If you find a problem, please [submit an issue](http://github.com/thetron/mongoi
 you can). Pull requests and feature requests are always welcome and
 greatly appreciated.
 
-Thanks to everyone that has contributed to this gem over the past year,
-in particular [stephan778](https://github.com/stephan778), [eagleas](https://github.com/eagleas) and [jamesotron](https://github.com/jamesotron). Many, many thanks - you guys rawk.
+Thanks to everyone that has contributed to this gem over the past year.
+Many, many thanks - you guys rawk.
+
+## Contributors:
+
+* [msolli](https://github.com/msolli)
+* [siong1987](https://github.com/siong1987)
+* [stephan778](https://github.com/stephan778) 
+* [eagleas](https://github.com/eagleas) 
+* [jamesotron](https://github.com/jamesotron).
