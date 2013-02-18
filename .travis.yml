@@ -7,3 +7,5 @@ gemfile:
 notifications:
   recipients:
     - nicholas@bruning.com.au
+services:
+  - mongodb
