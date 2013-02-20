@@ -1,7 +1,7 @@
 test:
   sessions:
     default:
-      database: mongoid_token_test
+      database: mongoid_token_plus_test
       hosts:
         - localhost:27017
       options:
