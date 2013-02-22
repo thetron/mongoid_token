@@ -84,6 +84,12 @@ You can also rename the token field, if required, using the
 
 * `token :contains => :numeric, :field_name => :purchase_order_number`
 
+You can add a prefix to the generated token using the
+`:prefix` option (length doesn't include prefix):
+
+* `token :contains => :numeric, :length => 4, :prefix => 'TST-'`  =>  `TST-0123`
+
+
 ### Examples:
 
 * `token :length => 8, :contains => :alphanumeric` generates something like `8Sdc98dQ`
