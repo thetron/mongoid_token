@@ -21,11 +21,11 @@ module Mongoid
         #end
 
         set_callback(:create, :before) do |document|
-          document.create_token(options[:length], options[:contains])
+          document.create_token(options[:length], options[:contains], options[:prefix])
         end
 
         set_callback(:save, :before) do |document|
-          document.create_token_if_nil(options[:length], options[:contains])
+          document.create_token_if_nil(options[:length], options[:contains], options[:prefix])
         end
 
         after_initialize do # set_callback did not work with after_initialize callback
@@ -33,6 +33,7 @@ module Mongoid
           self.instance_variable_set :@token_field_name, options[:field_name]
           self.instance_variable_set :@token_length, options[:length]
           self.instance_variable_set :@token_contains, options[:contains]
+          self.instance_variable_set :@token_prefix, options[:prefix]
         end
 
         if options[:retry] > 0
@@ -67,7 +68,7 @@ module Mongoid
                           e.details['err'] =~ /"#{self.send(@token_field_name.to_sym)}"/
 
         if (retries -= 1) > 0
-          self.create_token(@token_length, @token_contains)
+          self.create_token(@token_length, @token_contains, @token_prefix)
           retry
         else
           Rails.logger.warn "[Mongoid::Token] Warning: Maximum to generation retries (#{@max_collision_retries}) exceeded." if defined?(Rails) && Rails.env == 'development'
@@ -84,14 +85,23 @@ module Mongoid
       resolve_token_collisions { with(:safe => true).upsert_without_safety(options) }
     end
 
-    def create_token(length, characters)
-      self.send(:"#{@token_field_name}=", self.generate_token(length, characters))
+    def create_token(length, characters, prefix = nil)
+      token = self.generate_token(length, characters)
+      token = prefix_token(token, prefix) if prefix
+
+      self.send(:"#{@token_field_name}=", token)
     end
 
-    def create_token_if_nil(length, characters)
+    def create_token_if_nil(length, characters, prefix = nil)
       if self[@token_field_name.to_sym].blank?
-        self.create_token(length, characters) 
+        self.create_token(length, characters, prefix)
       end
+    end
+
+    def prefix_token(token, prefix = nil)
+      return token unless prefix
+
+      "#{prefix}#{token}"
     end
 
     def generate_token(length, characters = :alphanumeric)

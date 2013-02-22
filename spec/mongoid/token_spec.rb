@@ -73,6 +73,15 @@ class Cluster
   embeds_many :nodes
 end
 
+class Prefixed
+  include Mongoid::Document
+  include Mongoid::Token
+
+  field :name
+
+  token :length => 8, :contains => :alphanumeric, :prefix => 'TST-'
+end
+
 describe Mongoid::Token do
   before :each do
     @account = Account.create(:name => "Involved Pty. Ltd.")
@@ -80,6 +89,7 @@ describe Mongoid::Token do
     @video = Video.create(:name => "Nyan nyan")
     @image = Image.create(:url => "http://involved.com.au/image.png")
     @event = Event.create(:name => "Super cool party!")
+    @prefixed = Prefixed.create(:name => 'Test')
 
     Account.create_indexes
     Link.create_indexes
@@ -88,12 +98,14 @@ describe Mongoid::Token do
     Image.create_indexes
     Event.create_indexes
     Node.create_indexes
+    Prefixed.create_indexes
   end
 
   it "should have a token field" do
     @account.attributes.include?('token').should == true
     @link.attributes.include?('token').should == true
     @video.attributes.include?('vid').should == true
+    @prefixed.attributes.include?('token').should == true
   end
 
   it "should have a token of correct length" do
@@ -230,6 +242,32 @@ describe Mongoid::Token do
         image = Image.create(:url => "http://something.com/image.png")
         image.token.should_not start_with "0"
       end
+    end
+  end
+
+  describe "when using a prefix" do
+    before {
+      Prefixed.destroy_all
+      Prefixed.create_indexes
+    }
+
+    it "should allow a prefix to be set" do
+      prefixed = Prefixed.create!(name: "Test")
+      Prefixed.count.should == 1
+      prefixed.token.should =~ /^TST\-\w{8}$/
+    end
+
+    it "should be findable when using a prefix" do
+      prefixed = Prefixed.create!(name: "Test")
+      Prefixed.find_by_token(Prefixed.first.token).should == Prefixed.first
+    end
+
+    it "should use a prefix on retries" do
+      first_prefix = Prefixed.create!(name: "Test")
+      Prefixed.any_instance.stub(:generate_token).and_return(first_prefix.token, 'aaaaaaaa')
+      next_prefixed = Prefixed.create!(name: "Test")
+
+      next_prefixed.token.should == 'TST-aaaaaaaa'
     end
   end
 end
