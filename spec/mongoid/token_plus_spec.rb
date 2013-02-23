@@ -2,21 +2,21 @@ require File.join(File.dirname(__FILE__), %w[.. spec_helper])
 
 class Account
   include Mongoid::Document
-  include Mongoid::Token
+  include Mongoid::TokenPlus
   field :name
   token :length => 16, :contains => :fixed_numeric
 end
 
 class Person
   include Mongoid::Document
-  include Mongoid::Token
+  include Mongoid::TokenPlus
   field :email
   token :length => 6, :contains => :numeric
 end
 
 class Link
   include Mongoid::Document
-  include Mongoid::Token
+  include Mongoid::TokenPlus
 
   field :url
   token :length => 3, :contains => :alphanumeric
@@ -26,14 +26,14 @@ end
 
 class FailLink
   include Mongoid::Document
-  include Mongoid::Token
+  include Mongoid::TokenPlus
   field :url
   token :length => 3, :contains => :alphanumeric, :retry => 0
 end
 
 class Video
   include Mongoid::Document
-  include Mongoid::Token
+  include Mongoid::TokenPlus
 
   field :name
   token :length => 8, :contains => :alpha, :field_name => :vid
@@ -41,7 +41,7 @@ end
 
 class Image
   include Mongoid::Document
-  include Mongoid::Token
+  include Mongoid::TokenPlus
 
   field :url
   token :length => 8, :contains => :fixed_numeric_no_leading_zeros
@@ -49,7 +49,7 @@ end
 
 class Event
   include Mongoid::Document
-  include Mongoid::Token
+  include Mongoid::TokenPlus
 
   field :name
   token :length => 8, :contains => :alpha_lower
@@ -57,7 +57,7 @@ end
 
 class Node
   include Mongoid::Document
-  include Mongoid::Token
+  include Mongoid::TokenPlus
 
   field :name
   token :length => 8, :contains => :fixed_numeric
@@ -75,7 +75,7 @@ end
 
 class Car
   include Mongoid::Document
-  include Mongoid::Token
+  include Mongoid::TokenPlus
 
   field :name
   token :length => 8, :contains => :alphanumeric, :field_name => :alt_id, :prefix => 'super-'
@@ -83,13 +83,13 @@ end
 
 class Driver
   include Mongoid::Document
-  include Mongoid::Token
+  include Mongoid::TokenPlus
 
   field :name
   token :length => 8, :contains => :alphanumeric, :suffix => '-as-predicted'
 end
 
-describe Mongoid::Token do
+describe Mongoid::TokenPlus do
   before :each do
     @account = Account.create(:name => "Involved Pty. Ltd.")
     @link = Link.create(:url => "http://involved.com.au")
@@ -209,7 +209,7 @@ describe Mongoid::Token do
     Link.any_instance.stub(:generate_token).and_return(@first_link.token)
     @link = Link.new(:url => "http://fail.com")
 
-    expect { @link.save! }.to raise_error(Mongoid::Token::CollisionRetriesExceeded)
+    expect { @link.save! }.to raise_error(Mongoid::TokenPlus::CollisionRetriesExceeded)
 
     Link.count.should == 1
     Link.where(:token => @first_link.token).count.should == 1
@@ -220,12 +220,12 @@ describe Mongoid::Token do
 
     Link.any_instance.stub(:generate_token).and_return(link.token)
 
-    expect { Link.create!(url: "http://example.com/2") }.to raise_error(Mongoid::Token::CollisionRetriesExceeded)
+    expect { Link.create!(url: "http://example.com/2") }.to raise_error(Mongoid::TokenPlus::CollisionRetriesExceeded)
   end
 
   it "should not raise a custom error if an operation failure is thrown for another reason" do
     link = Link.new
-    lambda{ link.save! }.should_not raise_error(Mongoid::Token::CollisionRetriesExceeded)
+    lambda{ link.save! }.should_not raise_error(Mongoid::TokenPlus::CollisionRetriesExceeded)
     link.valid?.should == false
   end
 
@@ -237,7 +237,7 @@ describe Mongoid::Token do
     Link.any_instance.stub(:generate_token).and_return(@first_link.token)
     @link = FailLink.new(:url => "http://fail.com")
 
-    lambda{ @link.save! }.should_not raise_error(Mongoid::Token::CollisionRetriesExceeded)
+    lambda{ @link.save! }.should_not raise_error(Mongoid::TokenPlus::CollisionRetriesExceeded)
   end
 
   it "should create unique indexes on embedded documents" do

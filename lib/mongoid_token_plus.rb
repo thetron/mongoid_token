@@ -1,7 +1,7 @@
-require 'mongoid/token/exceptions'
+require 'mongoid/token_plus/exceptions'
 
 module Mongoid
-  module Token
+  module TokenPlus
     extend ActiveSupport::Concern
 
     module ClassMethods
@@ -76,8 +76,8 @@ module Mongoid
           self.create_token(@token_length, @token_contains, @token_prefix, @token_suffix)
           retry
         else
-          Rails.logger.warn "[Mongoid::Token] Warning: Maximum to generation retries (#{@max_collision_retries}) exceeded." if defined?(Rails) && Rails.env == 'development'
-          raise Mongoid::Token::CollisionRetriesExceeded.new(self, @max_collision_retries)
+          Rails.logger.warn "[Mongoid::TokenPlus] Warning: Maximum generation retries (#{@max_collision_retries}) exceeded." if defined?(Rails) && Rails.env == 'development'
+          raise Mongoid::TokenPlus::CollisionRetriesExceeded.new(self, @max_collision_retries)
         end
       end
     end
