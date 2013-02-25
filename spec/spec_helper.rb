@@ -3,8 +3,8 @@ $: << File.expand_path("../../lib", __FILE__)
 require 'database_cleaner'
 require 'mongoid'
 require 'mongoid-rspec'
-require 'mongoid_token_plus'
-require 'mongoid/token_plus/exceptions'
+require 'mongoid_token'
+require 'mongoid/token/exceptions'
 
 ENV['MONGOID_ENV'] = "test"
 

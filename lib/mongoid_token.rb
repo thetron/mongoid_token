@@ -76,7 +76,7 @@ module Mongoid
           self.create_token(@token_length, @token_contains, @token_prefix, @token_suffix)
           retry
         else
-          Rails.logger.warn "[Mongoid::Token] Warning: Maximum to generation retries (#{@max_collision_retries}) exceeded." if defined?(Rails) && Rails.env == 'development'
+          Rails.logger.warn "[Mongoid::Token] Warning: Maximum generation retries (#{@max_collision_retries}) exceeded." if defined?(Rails) && Rails.env == 'development'
           raise Mongoid::Token::CollisionRetriesExceeded.new(self, @max_collision_retries)
         end
       end
