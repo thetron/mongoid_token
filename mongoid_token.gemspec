@@ -14,6 +14,7 @@ Gem::Specification.new do |s|
 
   s.rubyforge_project = "mongoid_token"
   s.add_dependency 'mongoid', '~> 3.0'
+  s.add_dependency 'randexp', '~> 0.1.7'
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
