@@ -44,5 +44,9 @@ describe Mongoid::Token::Options do
     Mongoid::Token::Options.new.field_name.should == :token
   end
 
+  it "should create a pattern" do
+    Mongoid::Token::Options.new.pattern.should == "%s4"
+  end
+
   it "shoudl have an option to replace default _id field"
 end

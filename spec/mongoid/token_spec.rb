@@ -152,21 +152,6 @@ describe Mongoid::Token do
     @video.to_param.should == @video.vid
   end
 
-
-  it "should be findable by token" do
-    50.times do |index|
-      Account.create(:name => "A random company #{index}")
-    end
-    Account.find_by_token(@account.token).id.should == @account.id
-    Account.find_by_token(Account.last.token).id.should == Account.last.id
-
-    10.times do |index|
-      Video.create(:name => "Lord of the Rings, Super Special Edition part #{index}")
-    end
-    Video.find_by_token(@video.vid).id.should == @video.id
-    Video.find_by_token(Video.last.vid).id.should == Video.last.id
-  end
-
   it "should create a token, if the token is missing" do
     @account.token = nil
     @account.save!

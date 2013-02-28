@@ -5,7 +5,7 @@
 # %D - non-zero digit / no-leading zero digit if longer than 1
 # %s - alphanumeric character
 # %w - upper and lower alpha character
-# %p - any URL-safe punctuation
+# %p - URL-safe punctuation
 #
 # Any pattern can be followed by a number, representing how many of that type to generate
 
@@ -49,11 +49,11 @@ module Mongoid
       end
 
       def self.integer(length = 1)
-        (rand(10**length - 10**(length-1)) + 10**(length-1)).to_s 
+        (rand(10**length - 10**(length-1)) + 10**(length-1)).to_s
       end
 
       def self.digits(length = 1)
-        rand(10**length).to_s
+        rand(10**length).to_s.rjust(length, "0")
       end
 
       def self.alpha(length = 1)
@@ -62,6 +62,10 @@ module Mongoid
 
       def self.alphanumeric(length = 1)
         (1..length).collect { (i = Kernel.rand(62); i += ((i < 10) ? 48 : ((i < 36) ? 55 : 61 ))).chr }.join
+      end
+
+      def self.punctuation(length = 1)
+        Array.new(length).map{['.','-','_','=','+','$'].map{|r|r.to_a}.flatten[rand(52)]}.join
       end
     end
   end
