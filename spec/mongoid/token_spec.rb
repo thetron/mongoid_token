@@ -163,7 +163,7 @@ describe Mongoid::Token do
     end
   end
 
-  it "should create the tiken only after the first save" do
+  it "should create the token only after the first save" do
     @account = Account.new(:name => "Smith & Co. LLC")
     @account.token.should be_nil
     @account.save!
