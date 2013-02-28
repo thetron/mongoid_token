@@ -6,10 +6,10 @@ Gem::Specification.new do |s|
   s.name        = "mongoid_token"
   s.version     = MongoidToken::VERSION
   s.platform    = Gem::Platform::RUBY
-  s.authors     = ["David Prater"]
-  s.email       = ["dprater@cisco.com"]
-  s.homepage    = ""
-  s.summary     = %q{A slightly updated random, unique token generator for Mongoid documents.}
+  s.authors     = ["Nicholas Bruning"]
+  s.email       = ["nicholas@bruning.com.au"]
+  s.homepage    = "http://github.com/thetron/mongoid_token"
+  s.summary     = %q{A little random, unique token generator for Mongoid documents.}
   s.description = %q{Mongoid token is a gem for creating random, unique tokens for mongoid documents. Highly configurable and great for making URLs a little more compact.}
 
   s.rubyforge_project = "mongoid_token"
