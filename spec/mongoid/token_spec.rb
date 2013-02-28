@@ -73,6 +73,22 @@ class Cluster
   embeds_many :nodes
 end
 
+class Car
+  include Mongoid::Document
+  include Mongoid::Token
+
+  field :name
+  token :length => 8, :contains => :alphanumeric, :field_name => :alt_id, :prefix => 'super-'
+end
+
+class Driver
+  include Mongoid::Document
+  include Mongoid::Token
+
+  field :name
+  token :length => 8, :contains => :alphanumeric, :suffix => '-as-predicted'
+end
+
 describe Mongoid::Token do
   before :each do
     @account = Account.create(:name => "Involved Pty. Ltd.")
@@ -80,7 +96,8 @@ describe Mongoid::Token do
     @video = Video.create(:name => "Nyan nyan")
     @image = Image.create(:url => "http://involved.com.au/image.png")
     @event = Event.create(:name => "Super cool party!")
-
+    @car = Car.create(:name => 'Super Deluxe Go Fast Car')
+    @driver = Driver.create(:name => 'Fast Driver')
     Account.create_indexes
     Link.create_indexes
     FailLink.create_indexes
@@ -88,12 +105,16 @@ describe Mongoid::Token do
     Image.create_indexes
     Event.create_indexes
     Node.create_indexes
+    Car.create_indexes
+    Driver.create_indexes
   end
 
   it "should have a token field" do
     @account.attributes.include?('token').should == true
     @link.attributes.include?('token').should == true
     @video.attributes.include?('vid').should == true
+    @car.attributes.include?('alt_id').should == true
+    @driver.attributes.include?('token').should == true
   end
 
   it "should have a token of correct length" do
@@ -101,6 +122,8 @@ describe Mongoid::Token do
     @link.token.length.should == 3
     @video.vid.length.should == 8
     @image.token.length.should == 8
+    @car.alt_id.length.should == 8 + 'super-'.length
+    @driver.token.length.should == 8 + '-as-predicted'.length
   end
 
   it "should only generate unique tokens" do
@@ -108,6 +131,10 @@ describe Mongoid::Token do
     1000.times do
       @link = Link.create(:url => "http://involved.com.au")
       Link.where(:token => @link.token).count.should == 1
+      @driver = Driver.create(:name => 'firstname lastname')
+      Driver.where(:token => @driver.token).count.should == 1
+      @car = Car.create(:name => 'super car')
+      Car.where(:alt_id => @car.alt_id).count.should == 1
     end
   end
 
@@ -136,7 +163,7 @@ describe Mongoid::Token do
     end
   end
 
-  it "should create the only after the first save" do
+  it "should create the tiken only after the first save" do
     @account = Account.new(:name => "Smith & Co. LLC")
     @account.token.should be_nil
     @account.save!
@@ -150,6 +177,7 @@ describe Mongoid::Token do
     @account.to_param.should == @account.token
     @link.to_param.should == @link.token
     @video.to_param.should == @video.vid
+    @car.to_param.should == @car.alt_id
   end
 
 
@@ -231,5 +259,13 @@ describe Mongoid::Token do
         image.token.should_not start_with "0"
       end
     end
+  end
+
+  it "should prepend specified prefix" do
+    @car.alt_id.match(/\Asuper-[a-zA-Z0-9]{8}\Z/).should_not be_nil
+  end
+
+  it "should append specified suffix" do
+    @driver.token.match(/\A[a-zA-z0-9]{8}-as-predicted\Z/).should_not be_nil
   end
 end
