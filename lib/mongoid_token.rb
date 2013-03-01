@@ -21,7 +21,7 @@ module Mongoid
         #end
 
         set_callback(:create, :before) do |document|
-          document.create_token(options[:length], options[:contains]) 
+          document.create_token(options[:length], options[:contains])
         end
 
         set_callback(:save, :before) do |document|
@@ -109,7 +109,7 @@ module Mongoid
       when :fixed_numeric_no_leading_zeros
         (rand(10**length - 10**(length-1)) + 10**(length-1)).to_s
       when :alpha
-         Array.new(length).map{['A'..'Z','a'..'z'].map{|r|r.to_a}.flatten[rand(52)]}.join
+        Array.new(length).map{['A'..'Z','a'..'z'].map{|r|r.to_a}.flatten[rand(52)]}.join
       when :alpha_lower
         Array.new(length).map{['a'..'z'].map{|r|r.to_a}.flatten[rand(26)]}.join
       when :alpha_upper
