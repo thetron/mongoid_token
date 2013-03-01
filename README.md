@@ -65,10 +65,8 @@ See 'Token collision/duplicate prevention' below for more details.
 
 The `token` method has a couple of key options: 
 
-* `length`, which determines the length (or maximum length, in some cases) before a prefix or suffix is added.
+* `length`, which determines the length (or maximum length, in some cases).
 * `contains`, which tells Mongoid::Token which characters to use when generating the token.
-* `prefix`, which prepends the specified prefix to the beginning of the token
-* `suffix`, which appends the specified suffix to the end of the token
 
 The options for `contains` are as follows:
 
@@ -99,8 +97,6 @@ You can also rename the token field, if required, using the
   anything from `0000` to `9999` in a random order
 * `token :length => 4, :contains => :fixed_numeric_no_leading_zeros` will
 generate anything from `1000` to `9999` in a random order
-* `token :length => 8, :contains => :alphanumeric, :prefix => 'super-'` will
-generate something like 'super-8Sdc98dQ'
 
 ## Finders
 
