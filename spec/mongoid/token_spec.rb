@@ -217,4 +217,15 @@ describe Mongoid::Token do
       end
     end
   end
+
+  it "should maintain options if cloned" do
+    link = Link.create!(:url => "http://www.google.com")
+    cloned_link = link.clone
+
+    cloned_link.token_options.should_not be_nil
+    cloned_link.token_options.length.should == 3
+
+    cloned_link.save
+    cloned_link.token.should_not == link.token
+  end
 end
