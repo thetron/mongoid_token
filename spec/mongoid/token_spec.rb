@@ -24,6 +24,26 @@ class Link
   validates :url, :presence => true
 end
 
+class IdLink
+  include Mongoid::Document
+  include Mongoid::Token
+
+  field :url
+  token :length => 3, :contains => :alphanumeric, :override_to_param => false
+
+  validates :url, :presence => true
+end
+
+class TokenLink
+  include Mongoid::Document
+  include Mongoid::Token
+
+  field :url
+  token :length => 3, :contains => :alphanumeric, :override_to_param => true
+
+  validates :url, :presence => true
+end
+
 class FailLink
   include Mongoid::Document
   include Mongoid::Token
@@ -77,12 +97,16 @@ describe Mongoid::Token do
   before :each do
     @account = Account.create(:name => "Involved Pty. Ltd.")
     @link = Link.create(:url => "http://involved.com.au")
+    @idlink = IdLink.create(:url => "http://involved.com.au")
+    @tokenlink = TokenLink.create(:url => "http://involved.com.au")
     @video = Video.create(:name => "Nyan nyan")
     @image = Image.create(:url => "http://involved.com.au/image.png")
     @event = Event.create(:name => "Super cool party!")
 
     Account.create_indexes
     Link.create_indexes
+    IdLink.create_indexes
+    TokenLink.create_indexes
     FailLink.create_indexes
     Video.create_indexes
     Image.create_indexes
@@ -146,12 +170,20 @@ describe Mongoid::Token do
     initial_token.should == @account.token
   end
 
-  it "should return the token as its parameter" do
+  it "should return the token as its parameter by default" do
     @account.to_param.should == @account.token
     @link.to_param.should == @link.token
     @video.to_param.should == @video.vid
   end
 
+  it "should not return the token as its parameter if :override_to_param is set false" do
+    @idlink.to_param.should_not == @idlink.token
+    @idlink.to_param.should == @idlink.id.to_s
+  end
+
+  it "should return the token as its parameter if :override_to_param is set true" do
+    @tokenlink.to_param.should == @tokenlink.token
+  end
 
   it "should be findable by token" do
     50.times do |index|
