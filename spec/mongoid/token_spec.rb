@@ -209,6 +209,8 @@ describe Mongoid::Token do
     end
   end
 
+  it "should support multiple tokens on a single document"
+
   describe "with :fixed_numeric_not_null" do
     it "should not start with 0" do
       1000.times do
@@ -228,4 +230,6 @@ describe Mongoid::Token do
     cloned_link.save
     cloned_link.token.should_not == link.token
   end
+
+  it "should not override to_param if specified"
 end

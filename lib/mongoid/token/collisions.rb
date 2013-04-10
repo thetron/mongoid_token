@@ -1,46 +1,31 @@
 module Mongoid
   module Token
     module Collisions
-      extend ActiveSupport::Concern
-      included do
-        alias_method_chain :insert, :safety
-        alias_method_chain :upsert, :safety
-      end
-
-      module ClassMethods
-        def configure_resolution_handler()
-          # ???????????????
-        end
-      end
-
-      private
-      def insert_with_safety(options = {})
-        resolve_token_collisions { with(:safe => true).insert_without_safety(options) }
-      end
-
-      def upsert_with_safety(options = {})
-        resolve_token_collisions { with(:safe => true).upsert_without_safety(options) }
-      end
-
-      def resolve_token_collisions
-        retries = token_options.retry_count
-
+      def resolve_token_collisions(resolver)
+        retries = resolver.retry_count
         begin
           yield
         rescue Moped::Errors::OperationFailure => e
-          # This is horrible, but seems to be the only way to get the details of the exception?
-          continue unless [11000, 11001].include?(e.details['code'])
-          continue unless   e.details['err'] =~ /dup key/ &&
-            e.details['err'] =~ /"#{self.send(token_options.field_name)}"/
+          continue unless is_duplicate_token_error?(e, self, resolver.field_name)
 
-          if (retries -= 1) > 0
-            self.create_token(token_options.length, token_options.contains)
+          if (retries -= 1) >= 0
+            resolver.create_new_token_for(self)
             retry
           else
-            Rails.logger.warn "[Mongoid::Token] Warning: Maximum to generation retries (#{token_options.retry_count}) exceeded." if defined?(Rails) && Rails.env == 'development'
-            raise Mongoid::Token::CollisionRetriesExceeded.new(self, token_options.retry_count)
+            raise_collision_retries_exceeded_error resolver.field_name, resolver.retry_count
           end
         end
+      end
+
+      def raise_collision_retries_exceeded_error(field_name, retry_count)
+        Rails.logger.warn "[Mongoid::Token] Warning: Maximum token generation retries (#{retry_count}) exceeded on `#{field_name}'." if defined?(Rails)
+        raise Mongoid::Token::CollisionRetriesExceeded.new(self, retry_count)
+      end
+
+      def is_duplicate_token_error?(err, document, field_name)
+        [11000, 11001].include?(err.details['code']) &&
+          err.details['err'] =~ /dup key/ &&
+          err.details['err'] =~ /"#{document.send(field_name)}"/
       end
     end
   end

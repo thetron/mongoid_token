@@ -2,54 +2,53 @@ require 'mongoid/token/exceptions'
 require 'mongoid/token/options'
 require 'mongoid/token/generator'
 require 'mongoid/token/finders'
-require 'mongoid/token/collisions'
+require 'mongoid/token/collision_resolver'
 
 module Mongoid
   module Token
     extend ActiveSupport::Concern
-    include Collisions
-
-    included do
-      cattr_accessor :token_options
-    end
 
     module ClassMethods
       def token(*args)
-        self.token_options = Mongoid::Token::Options.new(args.extract_options!)
+        options = Mongoid::Token::Options.new(args.extract_options!)
 
-        self.field token_options.field_name, :type => String
-        self.index({ token_options.field_name => 1 }, { :unique => true })
+        self.field options.field_name, :type => String
+        self.index({ options.field_name => 1 }, { :unique => true })
 
-        Finders.create_custom_finder(self, token_options.field_name)
-        #Callbacks.configure_resolution_handler(token_options.field_name, token_options.retry_count)
+        resolver = Mongoid::Token::CollisionResolver.new(self, options.field_name, options.retry_count)
+        resolver.create_new_token = Proc.new do |document|
+          document.send(:create_token, options.field_name, options.pattern)
+        end
+
+        Finders.define_custom_token_finder_for(self, options.field_name)
 
         set_callback(:create, :before) do |document|
-          document.create_token(token_options.length, token_options.contains)
+          document.create_token options.field_name, options.pattern
         end
 
         set_callback(:save, :before) do |document|
-          document.create_token_if_nil(token_options.length, token_options.contains)
+          document.create_token_if_nil options.field_name, options.pattern
+        end
+
+        self.define_method :to_param do
+          self.send(options.field_name) || super
         end
       end
     end
 
-    def to_param
-      self.send(token_options.field_name) || super
-    end
-
     protected
-    def create_token(length, characters)
-      self.send(:"#{self.class.token_options.field_name.to_s}=", self.generate_token(length, characters))
+    def create_token(field_name, pattern)
+      self.send :"#{field_name.to_s}=", self.generate_token(pattern)
     end
 
-    def create_token_if_nil(length, characters)
-      if self[self.class.token_options.field_name.to_sym].blank?
-        self.create_token(length, characters) 
+    def create_token_if_nil(field_name, pattern)
+      if self[field_name.to_sym].blank?
+        self.create_token field_name, pattern
       end
     end
 
-    def generate_token(length, characters = :alphanumeric)
-      Mongoid::Token::Generator.generate(self.token_options.pattern)
+    def generate_token(pattern)
+      Mongoid::Token::Generator.generate pattern
     end
   end
 end

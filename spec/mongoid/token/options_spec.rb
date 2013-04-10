@@ -48,5 +48,6 @@ describe Mongoid::Token::Options do
     Mongoid::Token::Options.new.pattern.should == "%s4"
   end
 
-  it "shoudl have an option to replace default _id field"
+  it "should have an option to replace default _id field"
+  it "should have an option to supress to_param override"
 end

@@ -1,7 +1,7 @@
 module Mongoid
   module Token
     module Finders
-      def self.create_custom_finder(klass, field_name = :token)
+      def self.define_custom_token_finder_for(klass, field_name = :token)
         klass.define_singleton_method(:"find_by_#{field_name.to_s}") do |token|
           self.find_by(field_name.to_sym => token)
         end
