@@ -1,235 +1,218 @@
 require File.join(File.dirname(__FILE__), %w[.. spec_helper])
 
-class Account
-  include Mongoid::Document
-  include Mongoid::Token
-  field :name
-  token :length => 16, :contains => :fixed_numeric
-end
-
-class Person
-  include Mongoid::Document
-  include Mongoid::Token
-  field :email
-  token :length => 6, :contains => :numeric
-end
-
-class Link
-  include Mongoid::Document
-  include Mongoid::Token
-
-  field :url
-  token :length => 3, :contains => :alphanumeric
-
-  validates :url, :presence => true
-end
-
-class FailLink
-  include Mongoid::Document
-  include Mongoid::Token
-  field :url
-  token :length => 3, :contains => :alphanumeric, :retry => 0
-end
-
-class Video
-  include Mongoid::Document
-  include Mongoid::Token
-
-  field :name
-  token :length => 8, :contains => :alpha, :field_name => :vid
-end
-
-class Image
-  include Mongoid::Document
-  include Mongoid::Token
-
-  field :url
-  token :length => 8, :contains => :fixed_numeric_no_leading_zeros
-end
-
-class Event
-  include Mongoid::Document
-  include Mongoid::Token
-
-  field :name
-  token :length => 8, :contains => :alpha_lower
-end
-
-class Node
-  include Mongoid::Document
-  include Mongoid::Token
-
-  field :name
-  token :length => 8, :contains => :fixed_numeric
-
-  embedded_in :cluster
-end
-
-class Cluster
-  include Mongoid::Document
-
-  field :name
-
-  embeds_many :nodes
-end
-
 describe Mongoid::Token do
-  before :each do
-    @account = Account.create(:name => "Involved Pty. Ltd.")
-    @link = Link.create(:url => "http://involved.com.au")
-    @video = Video.create(:name => "Nyan nyan")
-    @image = Image.create(:url => "http://involved.com.au/image.png")
-    @event = Event.create(:name => "Super cool party!")
-
-    Account.create_indexes
-    Link.create_indexes
-    FailLink.create_indexes
-    Video.create_indexes
-    Image.create_indexes
-    Event.create_indexes
-    Node.create_indexes
+  let(:document_class) do
+    Class.new(Document)
   end
 
-  it "should have a token field" do
-    @account.attributes.include?('token').should == true
-    @link.attributes.include?('token').should == true
-    @video.attributes.include?('vid').should == true
+  let(:document) do
+    document_class.create
   end
 
-  it "should have a token of correct length" do
-    @account.token.length.should == 16
-    @link.token.length.should == 3
-    @video.vid.length.should == 8
-    @image.token.length.should == 8
-  end
+  describe "#token" do
+    describe "field" do
+      before(:each) { document_class.send(:token) }
+      it "should be created" do
+        expect(document).to have_field(:token)
+      end
 
-  it "should only generate unique tokens" do
-    Link.create_indexes
-    1000.times do
-      @link = Link.create(:url => "http://involved.com.au")
-      Link.where(:token => @link.token).count.should == 1
+      it "should be indexed" do
+        expect(document).to have_index_for(:token => 1).with_options(:unique => true)
+      end
+    end
+
+    describe "options" do
+      it "should accept custom field names" do
+        document_class.send(:token, :field_name => :smells_as_sweet)
+        expect(document).to have_field(:smells_as_sweet)
+      end
+
+      it "should accept custom lengths" do
+        document_class.send(:token, :length => 13)
+        expect(document.token.length).to eq 13
+      end
+
+      it "should disable custom finders" do
+        class UntaintedDocument
+          include Mongoid::Document
+          include Mongoid::Token
+        end
+        dc = Class.new(UntaintedDocument)
+
+        dc.send(:token, :skip_finders => true)
+        expect(dc.public_methods).to_not include(:find_with_token)
+      end
+
+      it "should disable `to_param` overrides" do
+        document_class.send(:token, :override_to_param => false)
+        expect(document.to_param).to_not eq document.token
+      end
+
+      describe "contains" do
+        context "with :alphanumeric" do
+          it "should contain only letters and numbers" do
+            document_class.send(:token, :contains => :alphanumeric, :length => 64)
+            expect(document.token).to match(/[A-Za-z0-9]{64}/)
+          end
+        end
+        context "with :alpha" do
+          it "should contain only letters" do
+            document_class.send(:token, :contains => :alpha, :length => 64)
+            expect(document.token).to match(/[A-Za-z]{64}/)
+          end
+        end
+        context "with :alpha_upper" do
+          it "should contain only uppercase letters" do
+            document_class.send(:token, :contains => :alpha_upper, :length => 64)
+            expect(document.token).to match(/[A-Z]{64}/)
+          end
+        end
+        context "with :alpha_lower" do
+          it "should contain only lowercase letters" do
+            document_class.send(:token, :contains => :alpha_lower, :length => 64)
+            expect(document.token).to match(/[a-z]{64}/)
+          end
+        end
+        context "with :numeric" do
+          it "should only contain numbers" do
+            document_class.send(:token, :contains => :numeric, :length => 64)
+            expect(document.token).to match(/[0-9]{1,64}/)
+          end
+        end
+        context "with :fixed_numeric" do
+          it "should contain only numbers and be a fixed-length" do
+            document_class.send(:token, :contains => :fixed_numeric, :length => 64)
+            expect(document.token).to match(/[0-9]{64}/)
+          end
+        end
+        context "with :fixed_numeric_no_leading_zeros" do
+          it "should contain only numbers, be a fixed length, and have no leading zeros" do
+            document_class.send(:token, :contains => :fixed_numeric_no_leading_zeros, :length => 64)
+            expect(document.token).to match(/[1-9]{1}[0-9]{63}/)
+          end
+        end
+      end
+
+      describe "pattern" do
+        it "should conform" do
+          document_class.send(:token, :pattern => "%d%d%d%d%C%C%C%C")
+          expect(document.token).to match(/[0-9]{4}[A-Z]{4}/)
+        end
+        context "when there's a static prefix" do
+          it "should start with the prefix" do
+            document_class.send(:token, :pattern => "PREFIX-%d%d%d%d")
+            expect(document.token).to match(/PREFIX\-[0-9]{4}/)
+          end
+        end
+        context "when there's an infix" do
+          it "should contain the infix" do
+            document_class.send(:token, :pattern => "%d%d%d%d-INFIX-%d%d%d%d")
+            expect(document.token).to match(/[0-9]{4}\-INFIX\-[0-9]{4}/)
+          end
+        end
+        context "when there's a suffix" do
+          it "should end with the suffix" do
+            document_class.send(:token, :pattern => "%d%d%d%d-SUFFIX")
+            expect(document.token).to match(/[0-9]{4}\-SUFFIX/)
+          end
+        end
+      end
+    end
+
+    it "should allow for multiple tokens of different names" do
+      document_class.send(:token, :contains => :alpha_upper)
+      document_class.send(:token, :field_name => :sharing_id, :contains => :alpha_lower)
+      expect(document.token).to match(/[A-Z]{4}/)
+      expect(document.sharing_id).to match(/[a-z]{4}/)
     end
   end
 
-  it "should have a token containing only the specified characters" do
-    50.times do
-      @account = Account.create(:name => "Smith & Co. LLC")
-      @person = Person.create(:email => "some_random_235@gmail.com")
-
-      @account.token.gsub(/[0-9]/, "").length.should == 0
-      @person.token.gsub(/[0-9]/, "").length.should == 0
+  describe "callbacks" do
+    context "when the document is a new record" do
+      let(:document){ document_class.new }
+      it "should create the token after being saved" do
+        document_class.send(:token)
+        expect(document.token).to be_nil
+        document.save
+        expect(document.token).to_not be_nil
+      end
     end
-
-    50.times do
-      @link = Link.create(:url => "http://involved.com.au")
-      @link.token.gsub(/[A-Za-z0-9]/, "").length.should == 0
+    context "when the document is not a new record" do
+      it "should not change the token after being saved" do
+        document_class.send(:token)
+        token_before = document.token
+        document.save
+        expect(document.token).to eq token_before
+      end
+      context "and the token is nil" do
+        it "should create a new token after being saved" do
+          document_class.send(:token)
+          token_before = document.token
+          document.token = nil
+          document.save
+          expect(document.token).to_not be_nil
+          expect(document.token).to_not eq token_before
+        end
+      end
     end
+    context "when the document is cloned" do
+      it "should set the token to nil" do
+        document.class.send(:token, :length => 64, :contains => :alpha_upper)
+        d2 = document.clone
+        expect(d2.token).to be_nil
+      end
 
-    50.times do |index|
-      @video = Video.create(:name => "A test video")
-      @video.vid.gsub(/[A-Za-z]/, "").length.should == 0
-    end
-    
-    50.times do |index|
-      @event = Event.create(:name => "Super cool party!2")
-      @event.token.gsub(/[a-z]/, "").length.should == 0
-    end
-  end
-
-  it "should create the only after the first save" do
-    @account = Account.new(:name => "Smith & Co. LLC")
-    @account.token.should be_nil
-    @account.save!
-    @account.token.should_not be_nil
-    initial_token = @account.token
-    @account.save!
-    initial_token.should == @account.token
-  end
-
-  it "should return the token as its parameter" do
-    @account.to_param.should == @account.token
-    @link.to_param.should == @link.token
-    @video.to_param.should == @video.vid
-  end
-
-  it "should create a token, if the token is missing" do
-    @account.token = nil
-    @account.save!
-    @account.token.should_not be_nil
-  end
-
-  it "should fail with an exception after 3 retries" do
-    Link.destroy_all
-    Link.create_indexes
-
-    @first_link = Link.create(:url => "http://involved.com.au")
-    Link.any_instance.stub(:generate_token).and_return(@first_link.token)
-    @link = Link.new(:url => "http://fail.com")
-
-    expect { @link.save! }.to raise_error(Mongoid::Token::CollisionRetriesExceeded)
-
-    Link.count.should == 1
-    Link.where(:token => @first_link.token).count.should == 1
-  end
-
-  it "tries to resolve collisions when instantiated with create!" do
-    link = Link.create!(url: "http://example.com/1")
-
-    Link.any_instance.stub(:generate_token).and_return(link.token)
-
-    expect { Link.create!(url: "http://example.com/2") }.to raise_error(Mongoid::Token::CollisionRetriesExceeded)
-  end
-
-  it "should not raise a custom error if an operation failure is thrown for another reason" do
-    link = Link.new
-    lambda{ link.save! }.should_not raise_error(Mongoid::Token::CollisionRetriesExceeded)
-    link.valid?.should == false
-  end
-
-  it "should not raise a custom exception if retries are set to zero" do
-    FailLink.destroy_all
-    FailLink.create_indexes
-
-    @first_link = FailLink.create(:url => "http://involved.com.au")
-    Link.any_instance.stub(:generate_token).and_return(@first_link.token)
-    @link = FailLink.new(:url => "http://fail.com")
-
-    lambda{ @link.save! }.should_not raise_error(Mongoid::Token::CollisionRetriesExceeded)
-  end
-
-  it "should create unique indexes on embedded documents" do
-    @cluster = Cluster.create(:name => "CLUSTER_001")
-    5.times do |index|
-      @cluster.nodes.create!(:name => "NODE_#{index.to_s.rjust(3, '0')}")
-    end
-
-    @cluster.nodes.each do |node|
-      node.attributes.include?('token').should == true
-      node.token.match(/[0-9]{8}/).should_not == nil
-    end
-  end
-
-  it "should support multiple tokens on a single document"
-
-  describe "with :fixed_numeric_not_null" do
-    it "should not start with 0" do
-      1000.times do
-        image = Image.create(:url => "http://something.com/image.png")
-        image.token.should_not start_with "0"
+      it "should generate a new token with the same options as the source document" do
+        document.class.send(:token, :length => 64, :contains => :alpha_upper)
+        d2 = document.clone
+        d2.save
+        expect(d2.token).to_not eq document.token
+        expect(d2.token).to match(/[A-Z]{64}/)
       end
     end
   end
 
-  it "should maintain options if cloned" do
-    link = Link.create!(:url => "http://www.google.com")
-    cloned_link = link.clone
-
-    cloned_link.token_options.should_not be_nil
-    cloned_link.token_options.length.should == 3
-
-    cloned_link.save
-    cloned_link.token.should_not == link.token
+  describe "finders" do
+    it "should create a custom find method" do
+      document_class.send(:token, :field_name => :other_token)
+      expect(document.class.public_methods).to include(:find_by_other_token)
+    end
   end
 
-  it "should not override to_param if specified"
+  describe ".to_param" do
+    it "should return the token" do
+      document_class.send(:token)
+      expect(document.to_param).to eq document.token
+    end
+  end
+
+  describe "collision resolution" do
+    before(:each) do
+      document_class.send(:token)
+      document_class.create_indexes
+    end
+
+    context "when creating a new record" do
+      it "should raise an exception when collisions can't be resolved on save" do
+        document.token = "1234"
+        document.save
+        d2 = document.clone
+        d2.stub(:generate_token).and_return("1234")
+        expect{d2.save}.to raise_exception(Mongoid::Token::CollisionRetriesExceeded)
+      end
+
+      it "should raise an exception when collisions can't be resolved on create!" do
+        document.token = "1234"
+        document.save
+        document_class.any_instance.stub(:generate_token).and_return("1234")
+        expect{document_class.create!}.to raise_exception(Mongoid::Token::CollisionRetriesExceeded)
+      end
+    end
+
+    it "should not raise a custom error if an operation failure is thrown for another reason" do
+      document_class.send(:field, :name)
+      document_class.send(:validates_presence_of, :name)
+      expect{document_class.create!}.to_not raise_exception(Mongoid::Token::CollisionRetriesExceeded)
+    end
+  end
 end

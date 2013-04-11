@@ -1,6 +1,6 @@
 class Mongoid::Token::Options
   def initialize(options = {})
-    @options = merge_defaults(validate_options(options))
+    @options = merge_defaults validate_options(options)
   end
 
   def length
@@ -19,8 +19,16 @@ class Mongoid::Token::Options
     @options[:field_name]
   end
 
+  def skip_finders?
+    @options[:skip_finders]
+  end
+
+  def override_to_param?
+    @options[:override_to_param]
+  end
+
   def pattern
-    @pattern ||= case @options[:contains].to_sym
+    @options[:pattern] ||= case @options[:contains].to_sym
     when :alphanumeric
       "%s#{@options[:length]}"
     when :alpha
@@ -48,6 +56,13 @@ class Mongoid::Token::Options
   end
 
   def merge_defaults(options)
-    {:length => 4, :retry_count => 3, :contains => :alphanumeric, :field_name => :token}.merge(options)
+    {
+      :length => 4,
+      :retry_count => 3,
+      :contains => :alphanumeric,
+      :field_name => :token,
+      :skip_finders => false,
+      :override_to_param => true,
+    }.merge(options)
   end
 end

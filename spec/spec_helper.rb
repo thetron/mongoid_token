@@ -7,6 +7,11 @@ require 'mongoid_token'
 
 ENV['MONGOID_ENV'] = "test"
 
+class Document
+  include Mongoid::Document
+  include Mongoid::Token
+end
+
 RSpec.configure do |config|
   config.include Mongoid::Matchers
   config.before(:suite) do

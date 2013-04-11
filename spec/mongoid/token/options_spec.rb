@@ -48,6 +48,23 @@ describe Mongoid::Token::Options do
     Mongoid::Token::Options.new.pattern.should == "%s4"
   end
 
-  it "should have an option to replace default _id field"
-  it "should have an option to supress to_param override"
+  describe "override_to_param" do
+    it "should be an option" do
+      expect(Mongoid::Token::Options.new({:override_to_param => false}).override_to_param?).to eq false
+    end
+
+    it "should default to true" do
+      expect(Mongoid::Token::Options.new.override_to_param?).to eq true
+    end
+  end
+
+   describe "skip_finder" do
+    it "should be an option" do
+      expect(Mongoid::Token::Options.new({:skip_finders => true}).skip_finders?).to eq true
+    end
+
+    it "should default to false" do
+      expect(Mongoid::Token::Options.new.skip_finders?).to eq false
+    end
+  end
 end

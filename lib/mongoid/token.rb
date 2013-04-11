@@ -9,10 +9,15 @@ module Mongoid
     extend ActiveSupport::Concern
 
     module ClassMethods
+      def initialize_copy(source)
+        super
+        self.token = nil
+      end
+
       def token(*args)
         options = Mongoid::Token::Options.new(args.extract_options!)
 
-        self.field options.field_name, :type => String
+        self.field options.field_name, :type => String, :default => nil
         self.index({ options.field_name => 1 }, { :unique => true })
 
         resolver = Mongoid::Token::CollisionResolver.new(self, options.field_name, options.retry_count)
@@ -20,7 +25,9 @@ module Mongoid
           document.send(:create_token, options.field_name, options.pattern)
         end
 
-        Finders.define_custom_token_finder_for(self, options.field_name)
+        if options.skip_finders? == false
+          Finders.define_custom_token_finder_for(self, options.field_name)
+        end
 
         set_callback(:create, :before) do |document|
           document.create_token options.field_name, options.pattern
@@ -30,8 +37,10 @@ module Mongoid
           document.create_token_if_nil options.field_name, options.pattern
         end
 
-        self.define_method :to_param do
-          self.send(options.field_name) || super
+        if options.override_to_param?
+          self.define_method :to_param do
+            self.send(options.field_name) || super
+          end
         end
       end
     end
