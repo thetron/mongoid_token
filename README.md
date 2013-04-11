@@ -63,9 +63,10 @@ See 'Token collision/duplicate prevention' below for more details.
 
 ## Options
 
-The `token` method has a couple of key options: `length`, which determines the
-length (or maximum length, in some cases) and `contains`, which tells
-Mongoid::Token which characters to use when generating the token.
+The `token` method has a couple of key options: 
+
+* `length`, which determines the length (or maximum length, in some cases).
+* `contains`, which tells Mongoid::Token which characters to use when generating the token.
 
 The options for `contains` are as follows:
 
@@ -96,7 +97,6 @@ You can also rename the token field, if required, using the
   anything from `0000` to `9999` in a random order
 * `token :length => 4, :contains => :fixed_numeric_no_leading_zeros` will
 generate anything from `1000` to `9999` in a random order
-
 
 ## Finders
 

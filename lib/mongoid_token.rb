@@ -65,17 +65,21 @@ module Mongoid
         yield
       rescue Moped::Errors::OperationFailure => e
         # This is horrible, but seems to be the only way to get the details of the exception?
-        continue unless [11000, 11001].include?(e.details['code'])
-        continue unless   e.details['err'] =~ /dup key/ &&
-                          e.details['err'] =~ /"#{self.send(@token_field_name.to_sym)}"/
+        if ([11000, 11001].include?(e.details['code']) && 
+            e.details['err'] =~ /dup key/ &&
+            e.details['err'] =~ /"#{self.send(@token_field_name.to_sym)}"/)
 
-        if (retries -= 1) > 0
-          self.create_token(@token_length, @token_contains)
-          retry
+          if (retries -= 1) > 0
+            self.create_token(@token_length, @token_contains)
+            retry
+          else
+            Rails.logger.warn "[Mongoid::Token] Warning: Maximum generation retries (#{@max_collision_retries}) exceeded." if defined?(Rails) && Rails.env == 'development'
+            raise Mongoid::Token::CollisionRetriesExceeded.new(self, @max_collision_retries)
+          end
         else
-          Rails.logger.warn "[Mongoid::Token] Warning: Maximum to generation retries (#{@max_collision_retries}) exceeded." if defined?(Rails) && Rails.env == 'development'
-          raise Mongoid::Token::CollisionRetriesExceeded.new(self, @max_collision_retries)
+          raise
         end
+      
       end
     end
 

@@ -102,7 +102,6 @@ describe Mongoid::Token do
     @video = Video.create(:name => "Nyan nyan")
     @image = Image.create(:url => "http://involved.com.au/image.png")
     @event = Event.create(:name => "Super cool party!")
-
     Account.create_indexes
     Link.create_indexes
     IdLink.create_indexes
@@ -160,7 +159,7 @@ describe Mongoid::Token do
     end
   end
 
-  it "should create the only after the first save" do
+  it "should create the token only after the first save" do
     @account = Account.new(:name => "Smith & Co. LLC")
     @account.token.should be_nil
     @account.save!
