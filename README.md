@@ -55,7 +55,7 @@ documents always have unique tokens) remember to create your indexes.
 By default, the gem will override the existing `find` method in Mongoid,
 in order to search for documents based on their token first (although
 the default behaviour of ObjectIDs is also there). You can disable these
-with the `skip_finders` configuration option (see below).
+with the [`skip_finders` configuration option](#skip-finders-skip_finders).
 
 ````
 Video.find("x3v98")
@@ -71,11 +71,11 @@ As of `Mongoid::Token` 2.0.0, you can now choose between two different
 systems for managing how your tokens look. 
 
 For simple setup, you can use
-combination of the `length` and `contains`, which modify the length and
+combination of the [`length`](#length-length) and [`contains`](#contains-contains), which modify the length and
 types of characters to use.
 
 For when you need to generate more complex tokens, you can use the
-`pattern` option, which allows for very low-level control of the precise
+[`pattern`](#pattern-pattern) option, which allows for very low-level control of the precise
 structure of your tokens, as well as allowing for static strings, like
 prefixes, infixes or suffixes.
 
@@ -83,7 +83,7 @@ prefixes, infixes or suffixes.
 
 This one is easy, it's just an integer. 
 
-Example:
+__Example:__
 
 ````
 token :length => 6 # Tokens are now of length 6
@@ -110,7 +110,7 @@ as numbers
 * `:fixed_numeric_no_leading_zeros` - same as `:fixed_numeric`, but will
 never start with zeros
 
-Examples:
+__Examples:__
 ````
 token :contains => :alpha_upper, :length => 8
 token :contains => :fixed_numeric
@@ -124,6 +124,35 @@ requirements to also have some basic structure. If you use the
 `:pattern` option, it will override both the `:length` and `:contains`
 options.
 
+This was designed to operate in a similar way to something like `strftime`,
+if the syntax offends you - please open an issue, I'd love to get some
+feedback here and better refine how these are generated.
+
+Any characters in the string are treated as static, except those that are
+proceeded by a `%`. Those special characters represent a single, randomly
+generated character, and are as follows:
+
+* `%s` - any uppercase, lowercase, or numeric character
+* `%w` - any uppercase, or lowercase character
+* `%c` - any lowercase character
+* `%C` - any uppercase character
+* `%d` - any digit
+* `%D` - any non-zero digit
+
+__Example:__
+
+````
+token :pattern => "PRE-%C%C-%d%d%d%d" # Generates something like: 'PRE-ND-3485'
+````
+
+You can also add a repetition modifier, which can help improve readability on
+more complex patterns. You simply add any integer after the letter.
+
+__Examples:__
+
+````
+token :sku => "APP-%d6" # Generates something like; "APP-638924"
+````
 
 ### Field Name (`:field_name`)
 
@@ -131,6 +160,7 @@ This allows you to change the field name used by `Mongoid::Token`
 (default is `:token`). This is particularly handy when you're wanting to
 use multiple tokens one a single document.
 
+__Examples:__
 ````
 token :length => 6
 token :field_name => :sharing_token, :length => 12
@@ -143,6 +173,7 @@ token :field_name => :yet_another
 This will prevent the gem from creating the customised finders and
 overrides for the default `find` behaviour used by Mongoid.
 
+__Example:__
 ````
 token :skip_finders => true
 ````
@@ -154,6 +185,7 @@ By default, `Mongoid::Token` will override to_param, to make it an easy
 drop-in replacement for the default ObjectIDs. If needed, you can turn
 this behaviour off:
 
+__Example:__
 ````
 token :override_to_param => false
 ````
@@ -166,6 +198,7 @@ more times before raising a `Mongoid::Token::CollisionRetriesExceeded`
 error. If you're wanting it to try harder, or less hard, then this
 option is for you.
 
+__Examples:__
 ````
 token :retry_count => 9
 token :retry_count => 0
