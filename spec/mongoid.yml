@@ -3,7 +3,7 @@ test:
     default:
       database: mongoid_token_test
       hosts:
-        - localhost:27017
+        - localhost:<%= ENV['BOXEN_MONGODB_PORT'] || 27017 %>
       options:
-        consistency: :strong
-        safe: false
+        #consistency: :strong
+        #safe: false
