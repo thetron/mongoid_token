@@ -2,6 +2,7 @@ script: "bundle exec rspec spec"
 language: ruby
 rvm:
   - 1.9.3
+  - 2.0.0
 gemfile:
   - Gemfile
 notifications:
