@@ -1,5 +1,7 @@
 require File.join(File.dirname(__FILE__), %w[.. .. spec_helper])
 
+require 'pp'
+
 describe Mongoid::Token::Collisions do
   let(:document) { Object.new }
   describe "#resolve_token_collisions" do
@@ -37,6 +39,15 @@ describe Mongoid::Token::Collisions do
           attempts = 0
           expect{document.resolve_token_collisions(resolver) { attempts += 1; raise Moped::Errors::OperationFailure.new("","") }}.to raise_error Mongoid::Token::CollisionRetriesExceeded
           expect(attempts).to eq 4
+        end
+      end
+
+      context "and a different index is violated" do
+        it "should bubble the operation failure" do
+          document.stub(:is_duplicate_token_error?).and_return(false)
+          resolver.stub(:retry_count).and_return(3)
+          e = Moped::Errors::OperationFailure.new("command", {:details => "nope"})
+          expect{document.resolve_token_collisions(resolver) { raise e }}.to raise_error(e)
         end
       end
     end
