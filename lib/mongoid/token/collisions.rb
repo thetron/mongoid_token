@@ -12,6 +12,8 @@ module Mongoid
               retry
             end
             raise_collision_retries_exceeded_error resolver.field_name, resolver.retry_count
+          else
+            raise e
           end
         end
       end

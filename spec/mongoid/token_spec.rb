@@ -209,10 +209,28 @@ describe Mongoid::Token do
       end
     end
 
-    it "should not raise a custom error if an operation failure is thrown for another reason" do
+    it "should not raise a custom error if another error is thrown during saving" do
       document_class.send(:field, :name)
       document_class.send(:validates_presence_of, :name)
-      expect{document_class.create!}.to_not raise_exception(Mongoid::Token::CollisionRetriesExceeded)
+      document_class.any_instance.stub(:generate_token).and_return("1234")
+      document_class.stub(:model_name).and_return(ActiveModel::Name.new(document_class, nil, "temp"))
+      expect{document_class.create!}.to raise_exception(Mongoid::Errors::Validations)
+    end
+
+    context "with other unique indexes present" do
+      before(:each) do
+        document_class.send(:field, :name)
+        document_class.send(:index, {:name => 1}, {:unique => true})
+        document_class.create_indexes
+      end
+
+      context "when violating the other index" do
+        it "should raise an operation failure" do
+          duplicate_name = "Got Duped."
+          document_class.create!(:name => duplicate_name)
+          expect{ document_class.create!(:name => duplicate_name) }.to raise_exception(Moped::Errors::OperationFailure)
+        end
+      end
     end
   end
 end
