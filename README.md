@@ -118,7 +118,7 @@ token :contains => :fixed_numeric
 
 #### Patterns (`:pattern`)
 
-New in 2.0.0, patterns allow you find-grained control over how your
+New in 2.0.0, patterns allow you fine-grained control over how your
 tokens look. It's great for generating random data that has a
 requirements to also have some basic structure. If you use the
 `:pattern` option, it will override both the `:length` and `:contains`
@@ -151,7 +151,7 @@ more complex patterns. You simply add any integer after the letter.
 __Examples:__
 
 ````
-token :sku => "APP-%d6" # Generates something like; "APP-638924"
+token :pattern => "APP-%d6" # Generates something like; "APP-638924"
 ````
 
 ### Field Name (`:field_name`)
