@@ -28,7 +28,7 @@ Then update your bundle
 In your Mongoid documents, just add `include Mongoid::Token` and the
 `token` method will take care of all the setup, like so:
 
-````
+```ruby
 class Person
   include Mongoid::Document
   include Mongoid::Token
@@ -38,7 +38,7 @@ class Person
   token
 end
 
-````
+```
 
 And that's it! There's lots of configuration options too - which are all
 listed [below](#configuration). By default, the `token` method will
@@ -57,10 +57,10 @@ in order to search for documents based on their token first (although
 the default behaviour of ObjectIDs is also there). You can disable these
 with the [`skip_finders` configuration option](#skip-finders-skip_finders).
 
-````
+```ruby
 Video.find("x3v98")
 Account.find("ACC-123456")
-````
+```
 
 
 ## Configuration
@@ -85,10 +85,10 @@ This one is easy, it's just an integer.
 
 __Example:__
 
-````
+```ruby
 token :length => 6 # Tokens are now of length 6
 token :length => 12 # Whow, whow, whow. Slow down egghead.
-````
+```
 
 You get the idea.
 
@@ -111,10 +111,10 @@ as numbers
 never start with zeros
 
 __Examples:__
-````
+```ruby
 token :contains => :alpha_upper, :length => 8
 token :contains => :fixed_numeric
-````
+```
 
 #### Patterns (`:pattern`)
 
@@ -141,18 +141,18 @@ generated character, and are as follows:
 
 __Example:__
 
-````
+```ruby
 token :pattern => "PRE-%C%C-%d%d%d%d" # Generates something like: 'PRE-ND-3485'
-````
+```
 
 You can also add a repetition modifier, which can help improve readability on
 more complex patterns. You simply add any integer after the letter.
 
 __Examples:__
 
-````
+```ruby
 token :pattern => "APP-%d6" # Generates something like; "APP-638924"
-````
+```
 
 ### Field Name (`:field_name`)
 
@@ -161,11 +161,11 @@ This allows you to change the field name used by `Mongoid::Token`
 use multiple tokens one a single document.
 
 __Examples:__
-````
+```ruby
 token :length => 6
 token :field_name => :sharing_token, :length => 12
 token :field_name => :yet_another
-````
+```
 
 
 ### Skip Finders (`:skip_finders`)
@@ -174,9 +174,9 @@ This will prevent the gem from creating the customised finders and
 overrides for the default `find` behaviour used by Mongoid.
 
 __Example:__
-````
+```ruby
 token :skip_finders => true
-````
+```
 
 
 ### Override to_param (`:override_to_param`)
@@ -186,9 +186,9 @@ drop-in replacement for the default ObjectIDs. If needed, you can turn
 this behaviour off:
 
 __Example:__
-````
+```ruby
 token :override_to_param => false
-````
+```
 
 
 ### Retry Count (`:retry_count`)
@@ -199,10 +199,10 @@ error. If you're wanting it to try harder, or less hard, then this
 option is for you.
 
 __Examples:__
-````
+```ruby
 token :retry_count => 9
 token :retry_count => 0
-````
+```
 
 # Notes
 
