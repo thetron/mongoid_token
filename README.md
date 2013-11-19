@@ -68,7 +68,7 @@ Account.find("ACC-123456")
 ### Tokens
 
 As of `Mongoid::Token` 2.0.0, you can now choose between two different
-systems for managing how your tokens look. 
+systems for managing how your tokens look.
 
 For simple setup, you can use
 combination of the [`length`](#length-length) and [`contains`](#contains-contains), which modify the length and
@@ -108,6 +108,9 @@ as numbers
 * `:numeric` - integer, length may be shorter than `:length`
 * `:fixed_numeric` - integer, but will always be of length `:length`
 * `:fixed_numeric_no_leading_zeros` - same as `:fixed_numeric`, but will
+never start with zeros
+* `:fixed_hex_numeric` - hex integer, but will always be of length `:length`
+* `:fixed_hex_numeric_no_leading_zeros` - same as `:fixed_hex_numeric`, but will
 never start with zeros
 
 __Examples:__

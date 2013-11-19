@@ -12,7 +12,7 @@
 module Mongoid
   module Token
     module Generator
-      REPLACE_PATTERN = /%((?<character>[cCdDpsw]{1})(?<length>\d+(,\d+)?)?)/
+      REPLACE_PATTERN = /%((?<character>[cCdDhHpsw]{1})(?<length>\d+(,\d+)?)?)/
 
       def self.generate(pattern)
         pattern.gsub REPLACE_PATTERN do |match|
@@ -29,6 +29,10 @@ module Mongoid
             digits(length)
           when 'D'
             integer(length)
+          when 'h'
+            digits(length, 16)
+          when 'H'
+            integer(length, 16)
           when 's'
             alphanumeric(length)
           when 'w'
@@ -48,12 +52,12 @@ module Mongoid
         Array.new(length).map{['A'..'Z'].map{|r|r.to_a}.flatten[rand(26)]}.join
       end
 
-      def self.integer(length = 1)
-        (rand(10**length - 10**(length-1)) + 10**(length-1)).to_s
+      def self.integer(length = 1, base = 10)
+        (rand(base**length - base**(length-1)) + base**(length-1)).to_s(base)
       end
 
-      def self.digits(length = 1)
-        rand(10**length).to_s.rjust(length, "0")
+      def self.digits(length = 1, base = 10)
+        rand(base**length).to_s(base).rjust(length, "0")
       end
 
       def self.alpha(length = 1)
