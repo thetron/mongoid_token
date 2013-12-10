@@ -39,7 +39,7 @@ module Mongoid
 
         if options.override_to_param?
           self.send(:define_method, :to_param) do
-            self.send(options.field_name) || super(args)
+            self.send(options.field_name) || super(*args)
           end
         end
       end
