@@ -154,6 +154,13 @@ describe Mongoid::Token do
           expect(document.token).to_not eq token_before
         end
       end
+      context "when the document is initialized with a token" do
+        it "should not change the token after being saved" do
+          document_class.send(:token)
+          token = 'test token'
+          expect(document_class.create!(token: token).token).to eq token
+        end
+      end
     end
     context "when the document is cloned" do
       it "should set the token to nil" do

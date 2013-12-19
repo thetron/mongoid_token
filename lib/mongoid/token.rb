@@ -30,7 +30,7 @@ module Mongoid
         end
 
         set_callback(:create, :before) do |document|
-          document.create_token options.field_name, options.pattern
+          document.create_token_if_nil options.field_name, options.pattern
         end
 
         set_callback(:save, :before) do |document|
