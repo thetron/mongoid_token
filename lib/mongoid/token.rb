@@ -18,7 +18,7 @@ module Mongoid
         options = Mongoid::Token::Options.new(args.extract_options!)
 
         self.field options.field_name, :type => String, :default => nil
-        self.index({ options.field_name => 1 }, { :unique => true })
+        self.index({ options.field_name => 1 }, { :unique => true, :sparse => true })
 
         resolver = Mongoid::Token::CollisionResolver.new(self, options.field_name, options.retry_count)
         resolver.create_new_token = Proc.new do |document|
