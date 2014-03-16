@@ -12,16 +12,16 @@ describe Mongoid::Token::Finders do
   end
 
   it "override the `find` method of the document" do
-    klass = Class.new 
+    klass = Class.new
     klass.define_singleton_method(:find) {|*args| :original_find }
     klass.define_singleton_method(:find_by) {|*args| :token_find }
 
     Mongoid::Token::Finders.define_custom_token_finder_for(klass)
 
-    klass.find(Moped::BSON::ObjectId.new).should == :original_find
-    klass.find(Moped::BSON::ObjectId.new, Moped::BSON::ObjectId.new).should == :original_find
+    klass.find(BSON::ObjectId.new).should == :original_find
+    klass.find(BSON::ObjectId.new, BSON::ObjectId.new).should == :original_find
     klass.find().should == :original_find
-    klass.find(Moped::BSON::ObjectId.new, "token").should == :token_find
+    klass.find(BSON::ObjectId.new, "token").should == :token_find
     klass.find("token").should == :token_find
   end
 

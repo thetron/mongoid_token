@@ -10,7 +10,7 @@ module Mongoid
 
     module ClassMethods
       def initialize_copy(source)
-        super
+        super(source)
         self.token = nil
       end
 
@@ -18,7 +18,7 @@ module Mongoid
         options = Mongoid::Token::Options.new(args.extract_options!)
 
         self.field options.field_name, :type => String, :default => nil
-        self.index({ options.field_name => 1 }, { :unique => true })
+        self.index({ options.field_name => 1 }, { :unique => true, :sparse => true })
 
         resolver = Mongoid::Token::CollisionResolver.new(self, options.field_name, options.retry_count)
         resolver.create_new_token = Proc.new do |document|
@@ -30,7 +30,7 @@ module Mongoid
         end
 
         set_callback(:create, :before) do |document|
-          document.create_token options.field_name, options.pattern
+          document.create_token_if_nil options.field_name, options.pattern
         end
 
         set_callback(:save, :before) do |document|
@@ -39,7 +39,7 @@ module Mongoid
 
         if options.override_to_param?
           self.send(:define_method, :to_param) do
-            self.send(options.field_name) || super
+            self.send(options.field_name) || super(*args)
           end
         end
       end
