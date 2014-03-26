@@ -22,7 +22,10 @@ describe Mongoid::Token do
       end
 
       it "should be indexed" do
-        expect(document).to have_index_for(:token => 1).with_options(:unique => true)
+        index = document.index_specifications.first
+        expect(index.fields).to eq([:token])
+        expect(index.options).to have_key(:unique)
+        expect(index.options).to have_key(:sparse)
       end
     end
 
