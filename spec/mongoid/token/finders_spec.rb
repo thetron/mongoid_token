@@ -33,9 +33,9 @@ describe Mongoid::Token::Finders do
   end
 
   it "retrieve a document using the `find` method" do
-    class Document; include Mongoid::Document; field :token; end
-    document = Document.create! :token => "1234"
-    Mongoid::Token::Finders.define_custom_token_finder_for(Document)
-    Document.find("1234").should == document
+    class AnotherDocument; include Mongoid::Document; field :token; end
+    document = AnotherDocument.create! :token => "1234"
+    Mongoid::Token::Finders.define_custom_token_finder_for(AnotherDocument)
+    AnotherDocument.find("1234").should == document
   end
 end

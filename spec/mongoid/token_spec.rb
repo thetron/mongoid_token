@@ -2,6 +2,11 @@ require File.join(File.dirname(__FILE__), %w[.. spec_helper])
 
 describe Mongoid::Token do
   let(:document_class) do
+    Object.send(:remove_const, :Document)
+    class Document
+      include Mongoid::Document
+      include Mongoid::Token
+    end
     Class.new(Document)
   end
 
@@ -217,6 +222,7 @@ describe Mongoid::Token do
     end
 
     it "should not raise a custom error if another error is thrown during saving" do
+      I18n.enforce_available_locales = false # Supress warnings in this example
       document_class.send(:field, :name)
       document_class.send(:validates_presence_of, :name)
       document_class.any_instance.stub(:generate_token).and_return("1234")

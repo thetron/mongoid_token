@@ -1,12 +1,15 @@
-script: "bundle exec rspec spec"
 language: ruby
+
 rvm:
   - 1.9.3
   - 2.0.0
+  - 2.1.0
+  - 2.1.1
+
 gemfile:
   - Gemfile
-notifications:
-  recipients:
-    - nicholas@bruning.com.au
+
 services:
   - mongodb
+
+script: "bundle exec rspec"
