@@ -40,12 +40,16 @@ module Mongoid
       end
 
       private
+      def self.rand_string_from_chars(chars, length = 1)
+        Array.new(length).map{ chars.sample }.join
+      end
+
       def self.down_character(length = 1)
-        Array.new(length).map{['a'..'z'].map{|r|r.to_a}.flatten[rand(26)]}.join
+        self.rand_string_from_chars ('a'..'z').to_a, length
       end
 
       def self.up_character(length = 1)
-        Array.new(length).map{['A'..'Z'].map{|r|r.to_a}.flatten[rand(26)]}.join
+        self.rand_string_from_chars ('A'..'Z').to_a, length
       end
 
       def self.integer(length = 1)
@@ -57,7 +61,7 @@ module Mongoid
       end
 
       def self.alpha(length = 1)
-        Array.new(length).map{['A'..'Z','a'..'z'].map{|r|r.to_a}.flatten[rand(52)]}.join
+        self.rand_string_from_chars (('A'..'Z').to_a + ('a'..'z').to_a), length
       end
 
       def self.alphanumeric(length = 1)
@@ -65,7 +69,7 @@ module Mongoid
       end
 
       def self.punctuation(length = 1)
-        Array.new(length).map{['.','-','_','=','+','$'].map{|r|r.to_a}.flatten[rand(52)]}.join
+        self.rand_string_from_chars ['.','-','_','=','+','$'], length
       end
     end
   end
