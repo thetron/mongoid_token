@@ -1,4 +1,6 @@
 # proposed pattern options
+# %a - lowercase alphanumeric character
+# %A - uppercase alphanumeric character
 # %c - lowercase character
 # %C - uppercase character
 # %d - digit
@@ -12,7 +14,7 @@
 module Mongoid
   module Token
     module Generator
-      REPLACE_PATTERN = /%((?<character>[cCdDpsw]{1})(?<length>\d+(,\d+)?)?)/
+      REPLACE_PATTERN = /%((?<character>[aAcCdDpsw]{1})(?<length>\d+(,\d+)?)?)/
 
       def self.generate(pattern)
         pattern.gsub REPLACE_PATTERN do |match|
@@ -21,6 +23,10 @@ module Mongoid
           length = [match_data[:length].to_i, 1].max
 
           case type
+          when 'a'
+            alphanumeric(length).downcase
+          when 'A'
+            alphanumeric(length).upcase
           when 'c'
             alpha(length).downcase
           when 'C'

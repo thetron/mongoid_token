@@ -2,6 +2,14 @@ require File.join(File.dirname(__FILE__), %w[.. .. spec_helper])
 
 describe Mongoid::Token::Generator do
   describe "#generate" do
+    it "generates lowercase alphanumeric characters" do
+      100.times{ Mongoid::Token::Generator.generate("%a").should =~ /[a-z0-9]/ }
+    end
+
+    it "generates uppercase alphanumeric characters" do
+      100.times{ Mongoid::Token::Generator.generate("%A").should =~ /[A-Z0-9]/ }
+    end
+
     it "generates lowercase characters" do
       100.times{ Mongoid::Token::Generator.generate("%c").should =~ /[a-z]/ }
     end
