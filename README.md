@@ -135,6 +135,8 @@ generated character, and are as follows:
 
 * `%s` - any uppercase, lowercase, or numeric character
 * `%w` - any uppercase, or lowercase character
+* `%a` - any lowercase, or numeric character
+* `%A` - any uppercase, or numeric character
 * `%c` - any lowercase character
 * `%C` - any uppercase character
 * `%d` - any digit
