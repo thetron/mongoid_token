@@ -1,4 +1,6 @@
 # proposed pattern options
+# %a - lowercase alphanumeric character
+# %A - uppercase alphanumeric character
 # %c - lowercase character
 # %C - uppercase character
 # %d - digit
@@ -12,7 +14,7 @@
 module Mongoid
   module Token
     module Generator
-      REPLACE_PATTERN = /%((?<character>[cCdDpsw]{1})(?<length>\d+(,\d+)?)?)/
+      REPLACE_PATTERN = /%((?<character>[aAcCdDpsw]{1})(?<length>\d+(,\d+)?)?)/
 
       def self.generate(pattern)
         pattern.gsub REPLACE_PATTERN do |match|
@@ -21,12 +23,16 @@ module Mongoid
           length = [match_data[:length].to_i, 1].max
 
           case type
+          when 'a'
+            alphanumeric(length).downcase
+          when 'A'
+            alphanumeric(length).upcase
           when 'c'
-            down_character(length)
+            alpha(length).downcase
           when 'C'
-            up_character(length)
+            alpha(length).upcase
           when 'd'
-            digits(length)
+            numeric(length)
           when 'D'
             integer(length)
           when 's'
@@ -44,20 +50,12 @@ module Mongoid
         Array.new(length).map{ chars.sample }.join
       end
 
-      def self.down_character(length = 1)
-        self.rand_string_from_chars ('a'..'z').to_a, length
-      end
-
-      def self.up_character(length = 1)
-        self.rand_string_from_chars ('A'..'Z').to_a, length
-      end
-
       def self.integer(length = 1)
-        (rand(10**length - 10**(length-1)) + 10**(length-1)).to_s
+        ('1'..'9').to_a.sample + self.numeric(length - 1)
       end
 
-      def self.digits(length = 1)
-        rand(10**length).to_s.rjust(length, "0")
+      def self.numeric(length = 1)
+        self.rand_string_from_chars ('0'..'9').to_a, length
       end
 
       def self.alpha(length = 1)
@@ -65,7 +63,7 @@ module Mongoid
       end
 
       def self.alphanumeric(length = 1)
-        (1..length).collect { (i = Kernel.rand(62); i += ((i < 10) ? 48 : ((i < 36) ? 55 : 61 ))).chr }.join
+        self.rand_string_from_chars (('0'..'9').to_a + ('A'..'Z').to_a + ('a'..'z').to_a), length
       end
 
       def self.punctuation(length = 1)
