@@ -1,3 +1,6 @@
+require "codeclimate-test-reporter"
+CodeClimate::TestReporter.start
+
 $: << File.expand_path("../../lib", __FILE__)
 
 require 'database_cleaner'
@@ -6,11 +9,6 @@ require 'mongoid-rspec'
 require 'mongoid_token'
 
 ENV['MONGOID_ENV'] = "test"
-
-class Document
-  include Mongoid::Document
-  include Mongoid::Token
-end
 
 RSpec.configure do |config|
   config.include Mongoid::Matchers
@@ -24,4 +22,12 @@ RSpec.configure do |config|
   end
 end
 
-Mongoid.load!( File.join(File.dirname(__FILE__), 'mongoid.yml') )
+Mongoid.configure do |config|
+  config.sessions = {
+    default: {
+      database: "mongoid_token_test",
+      hosts: [ "localhost:#{ENV['BOXEN_MONGODB_PORT'] || 27017}" ],
+      options: {}
+    }
+  }
+end

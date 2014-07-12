@@ -2,6 +2,11 @@ require File.join(File.dirname(__FILE__), %w[.. spec_helper])
 
 describe Mongoid::Token do
   let(:document_class) do
+    Object.send(:remove_const, :Document)
+    class Document
+      include Mongoid::Document
+      include Mongoid::Token
+    end
     Class.new(Document)
   end
 
@@ -17,7 +22,10 @@ describe Mongoid::Token do
       end
 
       it "should be indexed" do
-        expect(document).to have_index_for(:token => 1).with_options(:unique => true)
+        index = document.index_specifications.first
+        expect(index.fields).to eq([:token])
+        expect(index.options).to have_key(:unique)
+        expect(index.options).to have_key(:sparse)
       end
     end
 
@@ -154,6 +162,13 @@ describe Mongoid::Token do
           expect(document.token).to_not eq token_before
         end
       end
+      context "when the document is initialized with a token" do
+        it "should not change the token after being saved" do
+          document_class.send(:token)
+          token = 'test token'
+          expect(document_class.create!(token: token).token).to eq token
+        end
+      end
     end
     context "when the document is cloned" do
       it "should set the token to nil" do
@@ -210,6 +225,7 @@ describe Mongoid::Token do
     end
 
     it "should not raise a custom error if another error is thrown during saving" do
+      I18n.enforce_available_locales = false # Supress warnings in this example
       document_class.send(:field, :name)
       document_class.send(:validates_presence_of, :name)
       document_class.any_instance.stub(:generate_token).and_return("1234")

@@ -1,7 +1,5 @@
 require File.join(File.dirname(__FILE__), %w[.. .. spec_helper])
 
-require 'pp'
-
 describe Mongoid::Token::Collisions do
   let(:document) { Object.new }
   describe "#resolve_token_collisions" do

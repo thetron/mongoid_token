@@ -1,6 +1,7 @@
 # Mongoid::Token - Short snappy tokens for Mongoid documents
 
 [![Build Status](https://secure.travis-ci.org/thetron/mongoid_token.png)](http://travis-ci.org/thetron/mongoid_token)
+[![Code Climate](https://codeclimate.com/github/thetron/mongoid_token.png)](https://codeclimate.com/github/thetron/mongoid_token)
 
 This library is a quick and simple way to generate unique, random tokens
 for your mongoid documents, in the cases where you can't, or don't want
@@ -68,7 +69,7 @@ Account.find("ACC-123456")
 ### Tokens
 
 As of `Mongoid::Token` 2.0.0, you can now choose between two different
-systems for managing how your tokens look. 
+systems for managing how your tokens look.
 
 For simple setup, you can use
 combination of the [`length`](#length-length) and [`contains`](#contains-contains), which modify the length and
@@ -81,7 +82,7 @@ prefixes, infixes or suffixes.
 
 #### Length (`:length`)
 
-This one is easy, it's just an integer. 
+This one is easy, it's just an integer.
 
 __Example:__
 
@@ -92,7 +93,7 @@ token :length => 12 # Whow, whow, whow. Slow down egghead.
 
 You get the idea.
 
-The only caveat here is that if used in combination with the 
+The only caveat here is that if used in combination with the
 `:contains => :numeric` option, tokens may vary in length _up to_ the
 specified length.
 

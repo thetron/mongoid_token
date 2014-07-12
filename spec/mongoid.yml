@@ -1,9 +1,0 @@
-test:
-  sessions:
-    default:
-      database: mongoid_token_test
-      hosts:
-        - localhost:<%= ENV['BOXEN_MONGODB_PORT'] || 27017 %>
-      options:
-        consistency: :strong
-        safe: false

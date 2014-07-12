@@ -10,37 +10,51 @@ module Mongoid
 
     module ClassMethods
       def initialize_copy(source)
-        super
+        super(source)
         self.token = nil
       end
 
       def token(*args)
         options = Mongoid::Token::Options.new(args.extract_options!)
 
-        self.field options.field_name, :type => String, :default => nil
-        self.index({ options.field_name => 1 }, { :unique => true })
+        add_token_field_and_index(options)
+        add_token_collision_resolver(options)
+        set_token_callbacks(options)
+        
+        define_custom_finders(options) if options.skip_finders? == false
+        override_to_param(options) if options.override_to_param?
+      end
 
+      private
+      def add_token_field_and_index(options)
+        self.field options.field_name, :type => String, :default => nil
+        self.index({ options.field_name => 1 }, { :unique => true, :sparse => true })
+      end
+
+      def add_token_collision_resolver(options)
         resolver = Mongoid::Token::CollisionResolver.new(self, options.field_name, options.retry_count)
         resolver.create_new_token = Proc.new do |document|
           document.send(:create_token, options.field_name, options.pattern)
         end
+      end
 
-        if options.skip_finders? == false
-          Finders.define_custom_token_finder_for(self, options.field_name)
-        end
+      def define_custom_finders(options)
+        Finders.define_custom_token_finder_for(self, options.field_name)
+      end
 
+      def set_token_callbacks(options)
         set_callback(:create, :before) do |document|
-          document.create_token options.field_name, options.pattern
+          document.create_token_if_nil options.field_name, options.pattern
         end
 
         set_callback(:save, :before) do |document|
           document.create_token_if_nil options.field_name, options.pattern
         end
+      end
 
-        if options.override_to_param?
-          self.send(:define_method, :to_param) do
-            self.send(options.field_name) || super
-          end
+      def override_to_param(options)
+        self.send(:define_method, :to_param) do
+          self.send(options.field_name) || super(*args)
         end
       end
     end
