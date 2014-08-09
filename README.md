@@ -76,7 +76,7 @@ combination of the [`length`](#length-length) and [`contains`](#contains-contain
 types of characters to use.
 
 For when you need to generate more complex tokens, you can use the
-[`pattern`](#pattern-pattern) option, which allows for very low-level control of the precise
+[`pattern`](#patterns-pattern) option, which allows for very low-level control of the precise
 structure of your tokens, as well as allowing for static strings, like
 prefixes, infixes or suffixes.
 
