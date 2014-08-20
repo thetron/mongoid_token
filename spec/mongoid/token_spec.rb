@@ -56,6 +56,12 @@ describe Mongoid::Token do
         expect(document.to_param).to_not eq document.token
       end
 
+      it "should return id when token does not exist when calling `to_param`" do
+        document_class.send(:token, :override_to_param => true)
+        document.unset :token
+        expect(document.to_param).to eq document.id.to_s
+      end
+
       describe "contains" do
         context "with :alphanumeric" do
           it "should contain only letters and numbers" do
