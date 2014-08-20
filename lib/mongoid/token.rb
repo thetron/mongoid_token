@@ -22,7 +22,7 @@ module Mongoid
         set_token_callbacks(options)
         
         define_custom_finders(options) if options.skip_finders? == false
-        override_to_param(options) if options.override_to_param?
+        override_to_param(options, args) if options.override_to_param?
       end
 
       private
@@ -52,7 +52,7 @@ module Mongoid
         end
       end
 
-      def override_to_param(options)
+      def override_to_param(options, args)
         self.send(:define_method, :to_param) do
           self.send(options.field_name) || super(*args)
         end
