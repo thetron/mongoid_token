@@ -9,6 +9,7 @@ Gem::Specification.new do |s|
   s.authors     = ["Nicholas Bruning"]
   s.email       = ["nicholas@bruning.com.au"]
   s.homepage    = "http://github.com/thetron/mongoid_token"
+  s.licenses    = ['MIT']
   s.summary     = %q{A little random, unique token generator for Mongoid documents.}
   s.description = %q{Mongoid token is a gem for creating random, unique tokens for mongoid documents. Highly configurable and great for making URLs a little more compact.}
 
