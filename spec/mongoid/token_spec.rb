@@ -218,14 +218,14 @@ describe Mongoid::Token do
         document.token = "1234"
         document.save
         d2 = document.clone
-        d2.stub(:generate_token).and_return("1234")
+        allow(d2).to receive(:generate_token).and_return("1234")
         expect{d2.save}.to raise_exception(Mongoid::Token::CollisionRetriesExceeded)
       end
 
       it "should raise an exception when collisions can't be resolved on create!" do
         document.token = "1234"
         document.save
-        document_class.any_instance.stub(:generate_token).and_return("1234")
+        allow_any_instance_of(document_class).to receive(:generate_token).and_return("1234")
         expect{document_class.create!}.to raise_exception(Mongoid::Token::CollisionRetriesExceeded)
       end
     end
@@ -234,8 +234,8 @@ describe Mongoid::Token do
       I18n.enforce_available_locales = false # Supress warnings in this example
       document_class.send(:field, :name)
       document_class.send(:validates_presence_of, :name)
-      document_class.any_instance.stub(:generate_token).and_return("1234")
-      document_class.stub(:model_name).and_return(ActiveModel::Name.new(document_class, nil, "temp"))
+      allow_any_instance_of(document_class).to receive(:generate_token).and_return("1234")
+      allow(document_class).to receive(:model_name).and_return(ActiveModel::Name.new(document_class, nil, "temp"))
       expect{document_class.create!}.to raise_exception(Mongoid::Errors::Validations)
     end
 

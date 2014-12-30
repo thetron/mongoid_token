@@ -8,7 +8,7 @@ describe Mongoid::Token::Finders do
     klass = Class.new
     field = :another_token
     Mongoid::Token::Finders.define_custom_token_finder_for(klass, field)
-    klass.singleton_methods.should include(:"find_by_#{field}")
+    expect(klass.singleton_methods).to include(:"find_by_#{field}")
   end
 
   it "override the `find` method of the document" do
@@ -18,24 +18,24 @@ describe Mongoid::Token::Finders do
 
     Mongoid::Token::Finders.define_custom_token_finder_for(klass)
 
-    klass.find(BSON::ObjectId.new).should == :original_find
-    klass.find(BSON::ObjectId.new, BSON::ObjectId.new).should == :original_find
-    klass.find().should == :original_find
-    klass.find(BSON::ObjectId.new, "token").should == :token_find
-    klass.find("token").should == :token_find
+    expect(klass.find(BSON::ObjectId.new)).to eq(:original_find)
+    expect(klass.find(BSON::ObjectId.new, BSON::ObjectId.new)).to eq(:original_find)
+    expect(klass.find()).to eq(:original_find)
+    expect(klass.find(BSON::ObjectId.new, "token")).to eq(:token_find)
+    expect(klass.find("token")).to eq(:token_find)
   end
 
   it "retrieve a document using the dynamic finder" do
     class Document; include Mongoid::Document; field :token; end
     document = Document.create!(:token => "1234")
     Mongoid::Token::Finders.define_custom_token_finder_for(Document)
-    Document.find_by_token("1234").should == document
+    expect(Document.find_by_token("1234")).to eq(document)
   end
 
   it "retrieve a document using the `find` method" do
     class AnotherDocument; include Mongoid::Document; field :token; end
     document = AnotherDocument.create! :token => "1234"
     Mongoid::Token::Finders.define_custom_token_finder_for(AnotherDocument)
-    AnotherDocument.find("1234").should == document
+    expect(AnotherDocument.find("1234")).to eq(document)
   end
 end

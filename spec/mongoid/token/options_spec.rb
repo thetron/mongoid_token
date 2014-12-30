@@ -13,39 +13,39 @@ describe Mongoid::Token::Options do
   end
 
   it "should have a length" do
-    @options.length.should == 9999
+    expect(@options.length).to eq(9999)
   end
 
   it "should default to a length of 4" do
-    Mongoid::Token::Options.new.length.should == 4
+    expect(Mongoid::Token::Options.new.length).to eq(4)
   end
 
   it "should have a retry count" do
-    @options.retry_count.should == 8888
+    expect(@options.retry_count).to eq(8888)
   end
 
   it "should default to a retry count of 3" do
-    Mongoid::Token::Options.new.retry_count.should == 3
+    expect(Mongoid::Token::Options.new.retry_count).to eq(3)
   end
 
   it "should have a list of characters to contain" do
-    @options.contains.should == :nonsense
+    expect(@options.contains).to eq(:nonsense)
   end
 
   it "should default to an alphanumeric set of characters to contain" do
-    Mongoid::Token::Options.new.contains.should == :alphanumeric
+    expect(Mongoid::Token::Options.new.contains).to eq(:alphanumeric)
   end
 
   it "should have a field name" do
-    @options.field_name.should == :not_a_token
+    expect(@options.field_name).to eq(:not_a_token)
   end
 
   it "should default to a field name of 'token'" do
-    Mongoid::Token::Options.new.field_name.should == :token
+    expect(Mongoid::Token::Options.new.field_name).to eq(:token)
   end
 
   it "should create a pattern" do
-    Mongoid::Token::Options.new.pattern.should == "%s4"
+    expect(Mongoid::Token::Options.new.pattern).to eq("%s4")
   end
 
   describe "override_to_param" do
