@@ -18,6 +18,14 @@ describe Mongoid::Token::Generator do
       100.times{ Mongoid::Token::Generator.generate("%D").should =~ /[1-9]/ }
     end
 
+    it "generates hexdigits" do
+      100.times{ Mongoid::Token::Generator.generate("%h").should =~ /[0-9a-f]/ }
+    end
+
+    it "generates non-zero hexdigits" do
+      100.times{ Mongoid::Token::Generator.generate("%H").should =~ /[1-9a-f]/ }
+    end
+
     it "generates alphanumeric characters" do
       100.times{ Mongoid::Token::Generator.generate("%s").should =~ /[A-Za-z0-9]/ }
     end

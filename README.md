@@ -117,6 +117,9 @@ as numbers
 * `:fixed_numeric` - integer, but will always be of length `:length`
 * `:fixed_numeric_no_leading_zeros` - same as `:fixed_numeric`, but will
 never start with zeros
+* `:fixed_hex_numeric` - hex integer, but will always be of length `:length`
+* `:fixed_hex_numeric_no_leading_zeros` - same as `:fixed_hex_numeric`, but will
+never start with zeros
 
 __Examples:__
 ```ruby

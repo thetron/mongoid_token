@@ -43,6 +43,10 @@ class Mongoid::Token::Options
       "%d#{@options[:length]}"
     when :fixed_numeric_no_leading_zeros
       "%D#{@options[:length]}"
+    when :fixed_hex_numeric
+      "%h#{@options[:length]}"
+    when :fixed_hex_numeric_no_leading_zeros
+      "%H#{@options[:length]}"
     end
   end
 
