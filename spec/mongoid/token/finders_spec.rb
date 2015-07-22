@@ -1,13 +1,7 @@
 require File.join(File.dirname(__FILE__), %w[.. .. spec_helper])
 
 describe Mongoid::Token::Finders do
-  before do
-    @orig_stderr = $stderr
-    $stderr = StringIO.new
-  end
-
   after do
-    $stderr = @orig_stderr
     Object.send(:remove_const, :Document) if Object.constants.include?(:Document)
     Object.send(:remove_const, :AnotherDocument) if Object.constants.include?(:AnotherDocument)
   end
@@ -17,20 +11,6 @@ describe Mongoid::Token::Finders do
     field = :another_token
     Mongoid::Token::Finders.define_custom_token_finder_for(klass, field)
     klass.singleton_methods.should include(:"find_by_#{field}")
-  end
-
-  it "override the `find` method of the document" do
-    klass = Class.new
-    klass.define_singleton_method(:find) {|*args| :original_find }
-    klass.define_singleton_method(:find_by) {|*args| :token_find }
-
-    Mongoid::Token::Finders.define_custom_token_finder_for(klass)
-
-    klass.find(BSON::ObjectId.new).should == :original_find
-    klass.find(BSON::ObjectId.new, BSON::ObjectId.new).should == :original_find
-    klass.find().should == :original_find
-    klass.find(BSON::ObjectId.new, "token").should == :token_find
-    klass.find("token").should == :token_find
   end
 
   it "retrieve a document using the dynamic finder" do
@@ -46,31 +26,5 @@ describe Mongoid::Token::Finders do
     document2 = Document.create!(:token => "5678")
     Mongoid::Token::Finders.define_custom_token_finder_for(Document)
     Document.find_by_token(["1234", "5678"]).should == [document, document2]
-  end
-
-  it "retrieve a document using the `find` method" do
-    class AnotherDocument; include Mongoid::Document; field :token; end
-    document = AnotherDocument.create! :token => "1234"
-    Mongoid::Token::Finders.define_custom_token_finder_for(AnotherDocument)
-    AnotherDocument.find("1234").should == document
-  end
-
-  it 'retrieves multiple documents using the `find` method' do
-    class AnotherDocument; include Mongoid::Document; field :token; end
-    document = AnotherDocument.create! :token => "1234"
-    document2 = AnotherDocument.create! :token => "5678"
-    Mongoid::Token::Finders.define_custom_token_finder_for(AnotherDocument)
-    AnotherDocument.find(["1234", "5678"]).should == [document, document2]
-  end
-
-  describe :deprecations do
-    it "includes `find`" do
-      class AnotherDocument; include Mongoid::Document; field :token; end
-      document = AnotherDocument.create! :token => "1234"
-      Mongoid::Token::Finders.define_custom_token_finder_for(AnotherDocument)
-      AnotherDocument.find("1234")
-      $stderr.rewind
-      $stderr.string.chomp.should start_with("[DEPRECATION]"), "Expected deprecation warning for `find` method"
-    end
   end
 end

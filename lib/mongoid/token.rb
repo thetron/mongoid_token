@@ -20,14 +20,14 @@ module Mongoid
         add_token_field_and_index(options)
         add_token_collision_resolver(options)
         set_token_callbacks(options)
-        
+
         define_custom_finders(options) if options.skip_finders? == false
         override_to_param(options) if options.override_to_param?
       end
 
       private
       def add_token_field_and_index(options)
-        self.field options.field_name, :type => String, :default => nil
+        self.field options.field_name, :type => String, :default => default_value(options)
         self.index({ options.field_name => 1 }, { :unique => true, :sparse => true })
       end
 
@@ -56,6 +56,10 @@ module Mongoid
         self.send(:define_method, :to_param) do
           self.send(options.field_name) || super()
         end
+      end
+
+      def default_value(options)
+        options.generate_on_init && Mongoid::Token::Generator.generate(options.pattern) || nil
       end
     end
 

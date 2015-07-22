@@ -60,19 +60,17 @@ in your app
 
 ## Finders
 
-**Note: overriding of the `find` method has been deprecated in this
-version and will be removed in the next major release.**
+By default, the gem will add a convenience `find_by_[token name]` method, to
+make it a tiny bit simpler to query by your tokens. If you'd rather it didn't,
+you can disable these with the
+[`skip_finders` configuration option](#skip-finders-skip_finders).
 
-By default, the gem will override the existing `find` method in Mongoid,
-in order to search for documents based on their token first (although
-the default behaviour of ObjectIDs is also there). You can disable these
-with the [`skip_finders` configuration option](#skip-finders-skip_finders).
+The methods accept either a single token, or an array of tokens:
 
 ```ruby
-Video.find("x3v98")
-Account.find("ACC-123456")
+Video.find_by_token("x3v98") # If your token was named 'token'
+Account.find_by_account_number(["ACC-123456", "ACC-567890"]) # If your token was named 'account_number'
 ```
-
 
 ## Configuration
 
@@ -184,8 +182,7 @@ token :field_name => :yet_another
 
 ### Skip Finders (`:skip_finders`)
 
-This will prevent the gem from creating the customised finders and
-overrides for the default `find` behaviour used by Mongoid.
+This will prevent the gem from creating the extra `find_by_*` methods.
 
 __Example:__
 ```ruby

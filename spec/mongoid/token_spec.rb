@@ -4,6 +4,7 @@ describe Mongoid::Token do
   after do
     Object.send(:remove_const, :Document) if Object.constants.include?(:Document)
     Object.send(:remove_const, :AnotherDocument) if Object.constants.include?(:AnotherDocument)
+    Object.send(:remove_const, :UntaintedDocument) if Object.constants.include?(:UntaintedDocument)
   end
 
   let(:document_class) do
@@ -257,6 +258,30 @@ describe Mongoid::Token do
           expect{ document_class.create!(:name => duplicate_name) }.to raise_exception(Moped::Errors::OperationFailure)
         end
       end
+    end
+  end
+
+  describe "with overriden id" do
+    # Capture warnings about overriding _id, for cleaner test output
+    before do
+      @orig_stdout = $stdout
+      $stdout = StringIO.new
+      document_class.send(:token, id: true)
+    end
+
+    after do
+      $stdout = @orig_stdout
+    end
+
+    let(:document){ document_class.new }
+
+    it "should replace the _id field with a token" do
+      expect(document).to have_field(:_id)
+      expect(document).to_not have_field(:token)
+    end
+
+    it "should have a default token" do
+      expect(document.id).to_not be_blank
     end
   end
 end
