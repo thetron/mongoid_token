@@ -24,7 +24,7 @@ In your gemfile, add:
 
 Then update your bundle
 
-    $ bundle update
+    $ bundle install
 
 In your Mongoid documents, just add `include Mongoid::Token` and the
 `token` method will take care of all the setup, like so:
