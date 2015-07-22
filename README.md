@@ -60,6 +60,9 @@ in your app
 
 ## Finders
 
+**Note: overriding of the `find` method has been deprecated in this
+version and will be removed in the next major release.**
+
 By default, the gem will override the existing `find` method in Mongoid,
 in order to search for documents based on their token first (although
 the default behaviour of ObjectIDs is also there). You can disable these
