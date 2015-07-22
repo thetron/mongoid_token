@@ -67,4 +67,36 @@ describe Mongoid::Token::Options do
       expect(Mongoid::Token::Options.new.skip_finders?).to eq false
     end
   end
+
+  describe "id" do
+    context "when true" do
+      it "returns '_id' sa the field name" do
+        expect(Mongoid::Token::Options.new({id: true, field_name: :a_token}).field_name).to eq :_id
+      end
+    end
+
+    context "when false" do
+      it "returns the field_name option as the field name" do
+        expect(Mongoid::Token::Options.new({id: false, field_name: :a_token}).field_name).to eq :a_token
+      end
+    end
+  end
+
+  describe :generate_on_init do
+    it "defaults to false" do
+      expect(Mongoid::Token::Options.new({}).generate_on_init).to eq false
+    end
+
+    context "when id option set" do
+      it "is true" do
+        expect(Mongoid::Token::Options.new({id: true}).generate_on_init).to eq true
+      end
+    end
+
+    context "when id option is not set" do
+      it "is false" do
+        expect(Mongoid::Token::Options.new({id: false}).generate_on_init).to eq false
+      end
+    end
+  end
 end

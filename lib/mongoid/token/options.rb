@@ -16,7 +16,7 @@ class Mongoid::Token::Options
   end
 
   def field_name
-    @options[:field_name]
+    !@options[:id] && @options[:field_name] || :_id
   end
 
   def skip_finders?
@@ -25,6 +25,10 @@ class Mongoid::Token::Options
 
   def override_to_param?
     @options[:override_to_param]
+  end
+
+  def generate_on_init
+    @options[:id] || @options[:generate_on_init]
   end
 
   def pattern
@@ -61,12 +65,14 @@ class Mongoid::Token::Options
 
   def merge_defaults(options)
     {
-      :length => 4,
-      :retry_count => 3,
-      :contains => :alphanumeric,
-      :field_name => :token,
-      :skip_finders => false,
-      :override_to_param => true,
+      id: false,
+      length: 4,
+      retry_count: 3,
+      contains: :alphanumeric,
+      field_name: :token,
+      skip_finders: false,
+      override_to_param: true,
+      generate_on_init: false
     }.merge(options)
   end
 end
