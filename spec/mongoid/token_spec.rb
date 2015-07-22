@@ -1,8 +1,12 @@
 require File.join(File.dirname(__FILE__), %w[.. spec_helper])
 
 describe Mongoid::Token do
+  after do
+    Object.send(:remove_const, :Document) if Object.constants.include?(:Document)
+    Object.send(:remove_const, :AnotherDocument) if Object.constants.include?(:AnotherDocument)
+  end
+
   let(:document_class) do
-    Object.send(:remove_const, :Document)
     class Document
       include Mongoid::Document
       include Mongoid::Token
