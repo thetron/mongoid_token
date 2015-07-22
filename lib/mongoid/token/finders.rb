@@ -11,6 +11,7 @@ module Mongoid
         end
 
         klass.define_singleton_method :"find_with_#{field_name}" do |*args| # this is going to be painful if tokens happen to look like legal object ids
+          warn "[DEPRECATION] Using `find' from Mongoid::Token has been deprecated and will be removed in version 3.0.0."
           args.all?{|arg| BSON::ObjectId.legal?(arg)} ? send(:"find_without_#{field_name}",*args) : klass.send(:"find_by_#{field_name.to_s}", args.first)
         end
 

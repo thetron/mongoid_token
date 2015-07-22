@@ -1,11 +1,17 @@
 require File.join(File.dirname(__FILE__), %w[.. .. spec_helper])
 
 describe Mongoid::Token::Finders do
+  before do
+    @orig_stderr = $stderr
+    $stderr = StringIO.new
+  end
+
   after do
+    $stderr = @orig_stderr
     Object.send(:remove_const, :Document) if Object.constants.include?(:Document)
     Object.send(:remove_const, :AnotherDocument) if Object.constants.include?(:AnotherDocument)
   end
-  
+
   it "define a finder based on a field_name" do
     klass = Class.new
     field = :another_token
@@ -55,5 +61,16 @@ describe Mongoid::Token::Finders do
     document2 = AnotherDocument.create! :token => "5678"
     Mongoid::Token::Finders.define_custom_token_finder_for(AnotherDocument)
     AnotherDocument.find(["1234", "5678"]).should == [document, document2]
+  end
+
+  describe :deprecations do
+    it "includes `find`" do
+      class AnotherDocument; include Mongoid::Document; field :token; end
+      document = AnotherDocument.create! :token => "1234"
+      Mongoid::Token::Finders.define_custom_token_finder_for(AnotherDocument)
+      AnotherDocument.find("1234")
+      $stderr.rewind
+      $stderr.string.chomp.should start_with("[DEPRECATION]"), "Expected deprecation warning for `find` method"
+    end
   end
 end
