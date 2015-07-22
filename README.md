@@ -50,6 +50,13 @@ automatically creating a unique index on your documents using the token
 field. In order to take advantage of this feature (and ensure that your
 documents always have unique tokens) remember to create your indexes.
 
+## Using without Rails
+
+If you're using Mongoid without Rails, remember to:
+
+    require 'mongoid_token'
+
+in your app
 
 ## Finders
 
