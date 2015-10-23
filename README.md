@@ -20,7 +20,13 @@ Into something more like this:
 
 In your gemfile, add:
 
-    gem 'mongoid_token', '~> 2.0.0'
+```ruby
+# For mongoid < 5
+gem 'mongoid_token', '~> 3.0.0'
+
+# For mongoid >= 5
+gem 'mongoid_token', '~> 4.0.0'
+```
 
 Then update your bundle
 
