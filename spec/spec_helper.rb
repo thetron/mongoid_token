@@ -11,6 +11,8 @@ require 'mongoid_token'
 ENV['MONGOID_ENV'] = "test"
 
 RSpec.configure do |config|
+  Mongo::Logger.logger.level = Logger::ERROR
+
   config.include Mongoid::Matchers
   config.before(:suite) do
     DatabaseCleaner.strategy = :truncation
@@ -23,11 +25,5 @@ RSpec.configure do |config|
 end
 
 Mongoid.configure do |config|
-  config.sessions = {
-    default: {
-      database: "mongoid_token_test",
-      hosts: [ "localhost:#{ENV['BOXEN_MONGODB_PORT'] || 27017}" ],
-      options: {}
-    }
-  }
+  config.connect_to("mongoid_token_test", {})
 end

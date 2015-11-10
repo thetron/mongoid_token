@@ -255,7 +255,7 @@ describe Mongoid::Token do
         it "should raise an operation failure" do
           duplicate_name = "Got Duped."
           document_class.create!(:name => duplicate_name)
-          expect{ document_class.create!(:name => duplicate_name) }.to raise_exception(Moped::Errors::OperationFailure)
+          expect{ document_class.create!(:name => duplicate_name) }.to raise_exception(Mongo::Error::OperationFailure)
         end
       end
     end

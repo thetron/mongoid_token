@@ -5,7 +5,7 @@ module Mongoid
         retries = resolver.retry_count
         begin
           yield
-        rescue Moped::Errors::OperationFailure => e
+        rescue Mongo::Error::OperationFailure => e
           if is_duplicate_token_error?(e, self, resolver.field_name)
             if (retries -= 1) >= 0
               resolver.create_new_token_for(self)
@@ -24,9 +24,9 @@ module Mongoid
       end
 
       def is_duplicate_token_error?(err, document, field_name)
-        [11000, 11001].include?(err.details['code']) &&
-          err.details['err'] =~ /dup key/ &&
-          err.details['err'] =~ /"#{document.send(field_name)}"/
+        err.message =~ /(11000|11001)/ &&
+          err.message =~ /dup key/ &&
+          err.message =~ /"#{document.send(field_name)}"/
       end
     end
   end

@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.description = %q{Mongoid token is a gem for creating random, unique tokens for mongoid documents. Highly configurable and great for making URLs a little more compact.}
 
   s.rubyforge_project = "mongoid_token"
-  s.add_dependency 'mongoid', '~> 4.0.0'
+  s.add_dependency 'mongoid', '~> 5.0.0'
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
