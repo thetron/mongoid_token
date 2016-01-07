@@ -8,12 +8,12 @@ module Mongoid
   module Token
     extend ActiveSupport::Concern
 
-    module ClassMethods
-      def initialize_copy(source)
-        super(source)
-        self.token = nil
-      end
+    def initialize_copy(source)
+      super(source)
+      self.token = nil
+    end
 
+    module ClassMethods
       def token(*args)
         options = Mongoid::Token::Options.new(args.extract_options!)
 
