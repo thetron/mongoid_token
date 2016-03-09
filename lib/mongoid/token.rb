@@ -17,7 +17,8 @@ module Mongoid
       def token(*args)
         options = Mongoid::Token::Options.new(args.extract_options!)
 
-        add_token_field_and_index(options)
+        add_token_field(options)
+        add_index(options)
         add_token_collision_resolver(options)
         set_token_callbacks(options)
 
@@ -26,9 +27,12 @@ module Mongoid
       end
 
       private
-      def add_token_field_and_index(options)
+      def add_token_field(options)
         self.field options.field_name, :type => String, :default => default_value(options)
-        self.index({ options.field_name => 1 }, { :unique => true, :sparse => true })
+      end
+
+      def add_index(options)
+        self.index({ options.field_name => 1 }, { :unique => true, :sparse => true }) unless options.skip_index?
       end
 
       def add_token_collision_resolver(options)
