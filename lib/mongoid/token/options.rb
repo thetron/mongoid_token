@@ -23,6 +23,10 @@ class Mongoid::Token::Options
     @options[:skip_finders]
   end
 
+  def skip_index?
+    @options[:skip_index]
+  end
+
   def override_to_param?
     @options[:override_to_param]
   end
@@ -71,6 +75,7 @@ class Mongoid::Token::Options
       contains: :alphanumeric,
       field_name: :token,
       skip_finders: false,
+      skip_index: false,
       override_to_param: true,
       generate_on_init: false
     }.merge(options)

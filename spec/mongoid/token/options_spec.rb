@@ -68,6 +68,16 @@ describe Mongoid::Token::Options do
     end
   end
 
+   describe "skip_index" do
+    it "should be an option" do
+      expect(Mongoid::Token::Options.new({:skip_index => true}).skip_index?).to eq true
+    end
+
+    it "should default to false" do
+      expect(Mongoid::Token::Options.new.skip_index?).to eq false
+    end
+  end
+
   describe "id" do
     context "when true" do
       it "returns '_id' sa the field name" do
