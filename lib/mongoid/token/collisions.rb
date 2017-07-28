@@ -6,15 +6,13 @@ module Mongoid
         begin
           yield
         rescue Mongo::Error::OperationFailure => e
-          if is_duplicate_token_error?(e, self, resolver.field_name)
-            if (retries -= 1) >= 0
-              resolver.create_new_token_for(self)
-              retry
-            end
-            raise_collision_retries_exceeded_error resolver.field_name, resolver.retry_count
-          else
-            raise e
+          raise e unless is_duplicate_token_error?(e, self, resolver.field_name)
+          if (retries -= 1) >= 0
+            resolver.create_new_token_for(self)
+            retry
           end
+          raise_collision_retries_exceeded_error(resolver.field_name,
+                                                 resolver.retry_count)
         end
       end
 

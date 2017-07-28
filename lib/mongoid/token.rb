@@ -25,6 +25,10 @@ module Mongoid
         override_to_param(options) if options.override_to_param?
       end
 
+      def resolvers
+        @resolvers
+      end
+
       private
       def add_token_field_and_index(options)
         self.field options.field_name, :type => String, :default => default_value(options)
@@ -32,10 +36,14 @@ module Mongoid
       end
 
       def add_token_collision_resolver(options)
-        resolver = Mongoid::Token::CollisionResolver.new(self, options.field_name, options.retry_count)
+        @resolvers ||= []
+        resolver = Mongoid::Token::CollisionResolver.new(
+          self, options.field_name, options.retry_count
+        )
         resolver.create_new_token = Proc.new do |document|
           document.send(:create_token, options.field_name, options.pattern)
         end
+        @resolvers.push(resolver)
       end
 
       def define_custom_finders(options)
