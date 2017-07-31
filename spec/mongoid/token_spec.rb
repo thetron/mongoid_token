@@ -172,8 +172,7 @@ describe Mongoid::Token do
       let(:doc) { Doc.create(foo: "hello") }
       let(:dup_doc) { Doc.new }
       let(:exception) do
-        "insertDocument :: caused by :: 11000 E11000 duplicate key error "\
-        'index: mongoid_token_test.docs.$foo_1  dup key: { : "hello" } (11000)'
+        /E11000 duplicate key error index: mongoid_token_test.docs\.\$foo_1/
       end
 
       it do
