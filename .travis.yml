@@ -12,4 +12,6 @@ services:
 env:
   - CODECLIMATE_REPO_TOKEN=b216164ab66da464aa02fe5b862811ba0526c8dc7ea291ebe53056be4b6b5e1f
 
-script: "bundle exec rspec"
+script:
+  - bundle exec rspec
+  - bundle exec codeclimate-test-reporter
