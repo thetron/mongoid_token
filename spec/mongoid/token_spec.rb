@@ -138,11 +138,49 @@ describe Mongoid::Token do
       end
     end
 
-    it "should allow for multiple tokens of different names" do
-      document_class.send(:token, :contains => :alpha_upper)
-      document_class.send(:token, :field_name => :sharing_id, :contains => :alpha_lower)
-      expect(document.token).to match(/[A-Z]{4}/)
-      expect(document.sharing_id).to match(/[a-z]{4}/)
+    context "should allow for multiple tokens of different names" do
+      before do
+        document_class.send(:token, contains: :alpha_upper)
+        document_class.send(:token, field_name: :sharing_id,
+                                    contains: :alpha_lower)
+      end
+
+      it { expect(document.token).to match(/[A-Z]{4}/) }
+      it { expect(document.sharing_id).to match(/[a-z]{4}/) }
+    end
+
+    context "should raise exception for duplicated token" do
+      class Doc
+        include Mongoid::Document
+        include Mongoid::Token
+
+        token contains: :alpha_upper
+        token field_name: :sharing_id, contains: :alpha_lower
+        index({ foo: 1 }, unique: true, sparse: true)
+
+        field :foo
+      end
+
+      before do
+        Doc.create_indexes
+        doc
+        dup_doc.token = doc.token
+        dup_doc.sharing_id = doc.sharing_id
+        dup_doc.foo = doc.foo
+      end
+
+      let(:doc) { Doc.create(foo: "hello") }
+      let(:dup_doc) { Doc.new }
+      let(:exception) do
+        "insertDocument :: caused by :: 11000 E11000 duplicate key error "\
+        'index: mongoid_token_test.docs.$foo_1  dup key: { : "hello" } (11000)'
+      end
+
+      it do
+        expect { dup_doc.save }.to raise_error(exception)
+        expect(dup_doc.token).not_to eq(doc.token)
+        expect(dup_doc.sharing_id).not_to eq(doc.sharing_id)
+      end
     end
   end
 
