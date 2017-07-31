@@ -12,8 +12,7 @@ module Mongoid
       end
 
       def safe_operation(&block)
-        resolver = self.class.resolvers.first
-        resolve_token_collisions(resolver) { with(write: { w: 1 }, &block) }
+        resolve_token_collisions { with(write: { w: 1 }, &block) }
       end
     end
 

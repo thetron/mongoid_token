@@ -11,13 +11,19 @@ describe Mongoid::Token::Collisions do
         resolver.stub(:create_new_token_for){|doc|}
         document.class.send(:include, Mongoid::Token::Collisions)
         document.stub(:is_duplicate_token_error?).and_return(true)
+        document.class.stub(:resolvers).and_return([resolver])
       end
 
       context "and there are zero retries" do
         it "should raise an error after the first try" do
           resolver.stub(:retry_count).and_return(0)
           attempts = 0
-          expect{document.resolve_token_collisions(resolver) { attempts += 1; raise Mongo::Error::OperationFailure }}.to raise_error Mongoid::Token::CollisionRetriesExceeded
+          expect do
+            document.resolve_token_collisions do
+              attempts += 1
+              raise Mongo::Error::OperationFailure
+            end
+          end.to raise_error Mongoid::Token::CollisionRetriesExceeded
           expect(attempts).to eq 1
         end
       end
@@ -26,7 +32,12 @@ describe Mongoid::Token::Collisions do
         it "should raise an error after retrying once" do
           resolver.stub(:retry_count).and_return(1)
           attempts = 0
-          expect{document.resolve_token_collisions(resolver) { attempts += 1; raise Mongo::Error::OperationFailure }}.to raise_error Mongoid::Token::CollisionRetriesExceeded
+          expect do
+            document.resolve_token_collisions do
+              attempts += 1
+              raise Mongo::Error::OperationFailure
+            end
+          end.to raise_error Mongoid::Token::CollisionRetriesExceeded
           expect(attempts).to eq 2
         end
       end
@@ -35,7 +46,12 @@ describe Mongoid::Token::Collisions do
         it "should raise an error after retrying" do
           resolver.stub(:retry_count).and_return(3)
           attempts = 0
-          expect{document.resolve_token_collisions(resolver) { attempts += 1; raise Mongo::Error::OperationFailure }}.to raise_error Mongoid::Token::CollisionRetriesExceeded
+          expect do
+            document.resolve_token_collisions do
+              attempts += 1
+              raise Mongo::Error::OperationFailure
+            end
+          end.to raise_error Mongoid::Token::CollisionRetriesExceeded
           expect(attempts).to eq 4
         end
       end
@@ -45,7 +61,9 @@ describe Mongoid::Token::Collisions do
           document.stub(:is_duplicate_token_error?).and_return(false)
           resolver.stub(:retry_count).and_return(3)
           e = Mongo::Error::OperationFailure.new("nope")
-          expect{document.resolve_token_collisions(resolver) { raise e }}.to raise_error(e)
+          expect do
+            document.resolve_token_collisions { raise e }
+          end.to raise_error(e)
         end
       end
     end
@@ -73,7 +91,9 @@ describe Mongoid::Token::Collisions do
     end
 
     it "should raise an error" do
-      expect{ document.raise_collision_retries_exceeded_error(:token, 3) }.to raise_error(Mongoid::Token::CollisionRetriesExceeded)
+      expect { document.raise_collision_retries_exceeded_error(:token, 3) }.to(
+        raise_error(Mongoid::Token::CollisionRetriesExceeded)
+      )
     end
   end
 

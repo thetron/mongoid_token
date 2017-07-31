@@ -1,12 +1,16 @@
 module Mongoid
   module Token
     module Collisions
-      def resolve_token_collisions(resolver)
-        retries = resolver.retry_count
+      def resolve_token_collisions
+        retries = nil
         begin
           yield
         rescue Mongo::Error::OperationFailure => e
-          raise e unless is_duplicate_token_error?(e, self, resolver.field_name)
+          resolver = self.class.resolvers.select do |r|
+            is_duplicate_token_error?(e, self, r.field_name)
+          end.first
+          raise e unless resolver
+          retries ||= resolver.retry_count
           if (retries -= 1) >= 0
             resolver.create_new_token_for(self)
             retry
