@@ -1,9 +1,3 @@
-require 'mongoid/token/exceptions'
-require 'mongoid/token/options'
-require 'mongoid/token/generator'
-require 'mongoid/token/finders'
-require 'mongoid/token/collision_resolver'
-
 module Mongoid
   module Token
     extend ActiveSupport::Concern

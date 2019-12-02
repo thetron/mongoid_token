@@ -1,5 +1,3 @@
-require 'mongoid/token/collisions'
-
 module Mongoid
   module Token
     module SafeOperationsHandler

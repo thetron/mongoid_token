@@ -1,7 +1,5 @@
 module Mongoid
   module Token
-    class Error < StandardError; end
-
     class CollisionRetriesExceeded < Error
       def initialize(resource = "unknown resource", attempts = "unspecified")
         @resource = resource
