@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Mongoid
   module Token
     class CollisionRetriesExceeded < Error
@@ -7,7 +9,8 @@ module Mongoid
       end
 
       def to_s
-        "Failed to generate unique token for #{@resource} after #{@attempts} attempts."
+        "Failed to generate unique token for #{@resource} after #{@attempts} "\
+        "attempts."
       end
     end
   end

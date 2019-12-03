@@ -19,19 +19,25 @@ describe Mongoid::Token::Finders do
   end
 
   it "retrieve a document using the dynamic finder" do
-    class Document; include Mongoid::Document; field :token; end
+    class Document
+      include Mongoid::Document
+      field :token
+    end
+
     document = Document.create!(token: "1234")
     Mongoid::Token::Finders.define_custom_token_finder_for(Document)
     expect(Document.find_by_token("1234")).to eq(document)
   end
 
-  it 'retrieves multiple documents using the dynamic finder' do
-    class Document; include Mongoid::Document; field :token; end
+  it "retrieves multiple documents using the dynamic finder" do
+    class Document
+      include Mongoid::Document
+      field :token
+    end
+
     document = Document.create!(token: "1234")
     document2 = Document.create!(token: "5678")
     Mongoid::Token::Finders.define_custom_token_finder_for(Document)
-    expect(Document.find_by_token(["1234", "5678"])).to(
-      eq([document, document2])
-    )
+    expect(Document.find_by_token(%w[1234 5678])).to(eq([document, document2]))
   end
 end

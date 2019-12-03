@@ -8,7 +8,7 @@ describe Mongoid::Token::Collisions do
 
       before(:each) do
         allow(resolver).to receive(:field_name).and_return(:token)
-        allow(resolver).to receive(:create_new_token_for){|doc|}
+        allow(resolver).to receive(:create_new_token_for) { |doc| }
         document.class.send(:include, Mongoid::Token::Collisions)
         allow(document).to receive(:duplicate_token_error?).and_return(true)
         allow(document.class).to receive(:resolvers).and_return([resolver])
@@ -58,8 +58,8 @@ describe Mongoid::Token::Collisions do
 
       context "and a different index is violated" do
         it "should bubble the operation failure" do
-          allow(document).to(receive(:duplicate_token_error?)
-                             .and_return(false))
+          allow(document).to(receive(:duplicate_token_error?).
+                             and_return(false))
           allow(resolver).to receive(:retry_count).and_return(3)
           e = Mongo::Error::OperationFailure.new("nope")
           expect do
@@ -93,7 +93,7 @@ describe Mongoid::Token::Collisions do
 
     it "should raise an error" do
       expect { document.raise_collision_retries_exceeded_error(:token, 3) }.to(
-        raise_error(Mongoid::Token::CollisionRetriesExceeded)
+        raise_error(Mongoid::Token::CollisionRetriesExceeded),
       )
     end
   end
@@ -107,7 +107,7 @@ describe Mongoid::Token::Collisions do
         allow(document).to receive("token").and_return("tokenvalue123")
         allow(err).to(receive("message").and_return(message))
       end
-      let(:err) { double('Mongo::Error::OperationFailure', code: 11000) }
+      let(:err) { double("Mongo::Error::OperationFailure", code: 11_000) }
       subject { document.duplicate_token_error?(err, document, :token) }
 
       context "mongodb version 2.6, 3.0" do

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require File.join(File.dirname(__FILE__), %w[.. spec_helper])
 
 describe Mongoid::Token do
@@ -113,7 +115,8 @@ describe Mongoid::Token do
           end
         end
         context "with :fixed_numeric_no_leading_zeros" do
-          it "should contain only numbers, be a fixed length, and have no leading zeros" do
+          it "contain only numbers, be a fixed length, "\
+             "and have no leading zeros" do
             document_class.send(:token,
                                 contains: :fixed_numeric_no_leading_zeros,
                                 length: 64)
@@ -124,24 +127,24 @@ describe Mongoid::Token do
 
       describe "pattern" do
         it "should conform" do
-          document_class.send(:token, :pattern => "%d%d%d%d%C%C%C%C")
+          document_class.send(:token, pattern: "%d%d%d%d%C%C%C%C")
           expect(document.token).to match(/[0-9]{4}[A-Z]{4}/)
         end
         context "when there's a static prefix" do
           it "should start with the prefix" do
-            document_class.send(:token, :pattern => "PREFIX-%d%d%d%d")
+            document_class.send(:token, pattern: "PREFIX-%d%d%d%d")
             expect(document.token).to match(/PREFIX\-[0-9]{4}/)
           end
         end
         context "when there's an infix" do
           it "should contain the infix" do
-            document_class.send(:token, :pattern => "%d%d%d%d-INFIX-%d%d%d%d")
+            document_class.send(:token, pattern: "%d%d%d%d-INFIX-%d%d%d%d")
             expect(document.token).to match(/[0-9]{4}\-INFIX\-[0-9]{4}/)
           end
         end
         context "when there's a suffix" do
           it "should end with the suffix" do
-            document_class.send(:token, :pattern => "%d%d%d%d-SUFFIX")
+            document_class.send(:token, pattern: "%d%d%d%d-SUFFIX")
             expect(document.token).to match(/[0-9]{4}\-SUFFIX/)
           end
         end
@@ -182,7 +185,13 @@ describe Mongoid::Token do
       let(:doc) { Doc.create(foo: "hello") }
       let(:dup_doc) { Doc.new }
       let(:exception) do
-        /(E11000 duplicate key error index: mongoid_token_test.docs\.\$foo_1|E11000 duplicate key error collection: mongoid_token_test\.docs index: foo_1 dup key)/
+        lte_mongo3 =
+          "E11000 duplicate key error index: mongoid_token_test.docs\.\$foo_1"
+        gte_mongo4 =
+          "E11000 duplicate key error collection: mongoid_token_test\.docs "\
+          "index: foo_1 dup key"
+
+        /(#{lte_mongo3}|#{gte_mongo4})/
       end
 
       it do
@@ -195,7 +204,7 @@ describe Mongoid::Token do
 
   describe "callbacks" do
     context "when the document is a new record" do
-      let(:document){ document_class.new }
+      let(:document) { document_class.new }
       it "should create the token after being saved" do
         document_class.send(:token)
         expect(document.token).to be_nil
@@ -223,7 +232,7 @@ describe Mongoid::Token do
       context "when the document is initialized with a token" do
         it "should not change the token after being saved" do
           document_class.send(:token)
-          token = 'test token'
+          token = "test token"
           expect(document_class.create!(token: token).token).to eq token
         end
       end
@@ -235,7 +244,8 @@ describe Mongoid::Token do
         expect(d2.token).to be_nil
       end
 
-      it "should generate a new token with the same options as the source document" do
+      it "should generate a new token with the same options "\
+         "as the source document" do
         document.class.send(:token, length: 64, contains: :alpha_upper)
         d2 = document.clone
         d2.save
@@ -266,38 +276,42 @@ describe Mongoid::Token do
     end
 
     context "when creating a new record" do
-      it "should raise an exception when collisions can't be resolved on save" do
+      it "should raise an exception when collisions can't "\
+         "be resolved on save" do
         document.token = "1234"
         document.save
         d2 = document.clone
         allow(d2).to receive(:generate_token).and_return("1234")
         expect { d2.save }.to(
-          raise_exception(Mongoid::Token::CollisionRetriesExceeded)
+          raise_exception(Mongoid::Token::CollisionRetriesExceeded),
         )
       end
 
-      it "should raise an exception when collisions can't be resolved on create!" do
+      it "should raise an exception when collisions can't "\
+          "be resolved on create!" do
         document.token = "1234"
         document.save
         allow_any_instance_of(document_class).to(
-          receive(:generate_token).and_return("1234")
+          receive(:generate_token).and_return("1234"),
         )
         expect { document_class.create! }.to(
-          raise_exception(Mongoid::Token::CollisionRetriesExceeded)
+          raise_exception(Mongoid::Token::CollisionRetriesExceeded),
         )
       end
     end
 
-    it "should not raise a custom error if another error is thrown during saving" do
+    it "should not raise a custom error "\
+       "if another error is thrown during saving" do
       I18n.enforce_available_locales = false # Supress warnings in this example
       document_class.send(:field, :name)
       document_class.send(:validates_presence_of, :name)
-      allow_any_instance_of(document_class).to(receive(:generate_token)
-                                               .and_return("1234"))
-      allow(document_class).to(receive(:model_name)
-        .and_return(ActiveModel::Name.new(document_class, nil, "temp")))
+      allow_any_instance_of(document_class).to(
+        receive(:generate_token).and_return("1234"),
+      )
+      allow(document_class).to(receive(:model_name).
+        and_return(ActiveModel::Name.new(document_class, nil, "temp")))
       expect { document_class.create! }.to(
-        raise_exception(Mongoid::Errors::Validations)
+        raise_exception(Mongoid::Errors::Validations),
       )
     end
 
@@ -313,7 +327,7 @@ describe Mongoid::Token do
           duplicate_name = "Got Duped."
           document_class.create!(name: duplicate_name)
           expect { document_class.create!(name: duplicate_name) }.to(
-            raise_exception(Mongo::Error::OperationFailure)
+            raise_exception(Mongo::Error::OperationFailure),
           )
         end
       end

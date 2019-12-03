@@ -1,7 +1,6 @@
 require File.join(File.dirname(__FILE__), %w[.. .. spec_helper])
 
 describe Mongoid::Token::Options do
-
   let(:options) do
     Mongoid::Token::Options.new(length: 9999,
                                 retry_count: 8888,
