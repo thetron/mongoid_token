@@ -7,7 +7,7 @@ module Mongoid
           yield
         rescue Mongo::Error::OperationFailure => e
           resolver = self.class.resolvers.select do |r|
-            is_duplicate_token_error?(e, self, r.field_name)
+            duplicate_token_error?(e, self, r.field_name)
           end.first
           raise e unless resolver
           retries ||= resolver.retry_count
@@ -25,7 +25,7 @@ module Mongoid
         raise Mongoid::Token::CollisionRetriesExceeded.new(self, retry_count)
       end
 
-      def is_duplicate_token_error?(err, document, field_name)
+      def duplicate_token_error?(err, document, field_name)
         err.message =~ /(11000|11001)/ &&
           err.message =~ /dup key/ &&
           err.message =~ /"#{document.send(field_name)}"/ &&

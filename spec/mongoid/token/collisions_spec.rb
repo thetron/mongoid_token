@@ -10,7 +10,7 @@ describe Mongoid::Token::Collisions do
         allow(resolver).to receive(:field_name).and_return(:token)
         allow(resolver).to receive(:create_new_token_for){|doc|}
         document.class.send(:include, Mongoid::Token::Collisions)
-        allow(document).to receive(:is_duplicate_token_error?).and_return(true)
+        allow(document).to receive(:duplicate_token_error?).and_return(true)
         allow(document.class).to receive(:resolvers).and_return([resolver])
       end
 
@@ -58,7 +58,7 @@ describe Mongoid::Token::Collisions do
 
       context "and a different index is violated" do
         it "should bubble the operation failure" do
-          allow(document).to(receive(:is_duplicate_token_error?)
+          allow(document).to(receive(:duplicate_token_error?)
                              .and_return(false))
           allow(resolver).to receive(:retry_count).and_return(3)
           e = Mongo::Error::OperationFailure.new("nope")
@@ -98,7 +98,7 @@ describe Mongoid::Token::Collisions do
     end
   end
 
-  describe "#is_duplicate_token_error?" do
+  describe "#duplicate_token_error?" do
     before(:each) do
       document.class.send(:include, Mongoid::Token::Collisions)
     end
@@ -113,7 +113,7 @@ describe Mongoid::Token::Collisions do
                                   '{ : "tokenvalue123" } (11000) (on localhost'\
                                   ':27017, legacy retry, attempt 1) (on localh'\
                                   'ost:27017, legacy retry, attempt 1)'))
-        expect(document.is_duplicate_token_error?(err, document, :token)).to(
+        expect(document.duplicate_token_error?(err, document, :token)).to(
           be(true)
         )
       end
