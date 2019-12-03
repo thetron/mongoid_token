@@ -1,10 +1,13 @@
 language: ruby
 
-rvm:
-  - 2.2.2
-
-gemfile:
-  - Gemfile
+matrix:
+  include:
+    - rvm: 2.5.7
+      gemfile: gemfiles/mongoid_7.gemfile
+    - rvm: 2.5.7
+      gemfile: gemfiles/mongoid_6.gemfile
+    - rvm: 2.5.7
+      gemfile: gemfiles/mongoid_6_rails_5.1.gemfile
 
 services:
   - mongodb
