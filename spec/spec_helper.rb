@@ -1,14 +1,17 @@
+# frozen_string_literal: true
+
+require "simplecov"
 require "codeclimate-test-reporter"
-CodeClimate::TestReporter.start
+SimpleCov.start
 
-$: << File.expand_path("../../lib", __FILE__)
+$: << File.expand_path("../lib", __dir__)
 
-require 'database_cleaner'
-require 'mongoid'
-require 'mongoid-rspec'
-require 'mongoid_token'
+require "database_cleaner"
+require "mongoid"
+require "mongoid-rspec"
+require "mongoid_token"
 
-ENV['MONGOID_ENV'] = "test"
+ENV["MONGOID_ENV"] = "test"
 
 RSpec.configure do |config|
   Mongo::Logger.logger.level = Logger::ERROR

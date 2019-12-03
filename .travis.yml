@@ -1,13 +1,13 @@
 language: ruby
 
-rvm:
-  - 1.9.3
-  - 2.0.0
-  - 2.1.0
-  - 2.1.1
-
-gemfile:
-  - Gemfile
+matrix:
+  include:
+    - rvm: 2.5.7
+      gemfile: gemfiles/mongoid_7.gemfile
+    - rvm: 2.5.7
+      gemfile: gemfiles/mongoid_6.gemfile
+    - rvm: 2.5.7
+      gemfile: gemfiles/mongoid_6_rails_5.1.gemfile
 
 services:
   - mongodb
@@ -15,4 +15,6 @@ services:
 env:
   - CODECLIMATE_REPO_TOKEN=b216164ab66da464aa02fe5b862811ba0526c8dc7ea291ebe53056be4b6b5e1f
 
-script: "bundle exec rspec"
+script:
+  - bundle exec rspec
+  - bundle exec codeclimate-test-reporter

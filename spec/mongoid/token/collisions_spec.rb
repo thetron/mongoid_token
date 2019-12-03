@@ -7,45 +7,64 @@ describe Mongoid::Token::Collisions do
       let(:resolver) { double("Mongoid::Token::CollisionResolver") }
 
       before(:each) do
-        resolver.stub(:field_name).and_return(:token)
-        resolver.stub(:create_new_token_for){|doc|}
+        allow(resolver).to receive(:field_name).and_return(:token)
+        allow(resolver).to receive(:create_new_token_for) { |doc| }
         document.class.send(:include, Mongoid::Token::Collisions)
-        document.stub(:is_duplicate_token_error?).and_return(true)
+        allow(document).to receive(:duplicate_token_error?).and_return(true)
+        allow(document.class).to receive(:resolvers).and_return([resolver])
       end
 
       context "and there are zero retries" do
         it "should raise an error after the first try" do
-          resolver.stub(:retry_count).and_return(0)
+          allow(resolver).to receive(:retry_count).and_return(0)
           attempts = 0
-          expect{document.resolve_token_collisions(resolver) { attempts += 1; raise Mongo::Error::OperationFailure }}.to raise_error Mongoid::Token::CollisionRetriesExceeded
+          expect do
+            document.resolve_token_collisions do
+              attempts += 1
+              raise Mongo::Error::OperationFailure
+            end
+          end.to raise_error Mongoid::Token::CollisionRetriesExceeded
           expect(attempts).to eq 1
         end
       end
 
       context "and retries is set to 1" do
         it "should raise an error after retrying once" do
-          resolver.stub(:retry_count).and_return(1)
+          allow(resolver).to receive(:retry_count).and_return(1)
           attempts = 0
-          expect{document.resolve_token_collisions(resolver) { attempts += 1; raise Mongo::Error::OperationFailure }}.to raise_error Mongoid::Token::CollisionRetriesExceeded
+          expect do
+            document.resolve_token_collisions do
+              attempts += 1
+              raise Mongo::Error::OperationFailure
+            end
+          end.to raise_error Mongoid::Token::CollisionRetriesExceeded
           expect(attempts).to eq 2
         end
       end
 
       context "and retries is greater than 1" do
         it "should raise an error after retrying" do
-          resolver.stub(:retry_count).and_return(3)
+          allow(resolver).to receive(:retry_count).and_return(3)
           attempts = 0
-          expect{document.resolve_token_collisions(resolver) { attempts += 1; raise Mongo::Error::OperationFailure }}.to raise_error Mongoid::Token::CollisionRetriesExceeded
+          expect do
+            document.resolve_token_collisions do
+              attempts += 1
+              raise Mongo::Error::OperationFailure
+            end
+          end.to raise_error Mongoid::Token::CollisionRetriesExceeded
           expect(attempts).to eq 4
         end
       end
 
       context "and a different index is violated" do
         it "should bubble the operation failure" do
-          document.stub(:is_duplicate_token_error?).and_return(false)
-          resolver.stub(:retry_count).and_return(3)
+          allow(document).to(receive(:duplicate_token_error?).
+                             and_return(false))
+          allow(resolver).to receive(:retry_count).and_return(3)
           e = Mongo::Error::OperationFailure.new("nope")
-          expect{document.resolve_token_collisions(resolver) { raise e }}.to raise_error(e)
+          expect do
+            document.resolve_token_collisions { raise e }
+          end.to raise_error(e)
         end
       end
     end
@@ -62,8 +81,8 @@ describe Mongoid::Token::Collisions do
       stub_const("Rails", Class.new)
 
       logger = double("logger")
-      logger.stub("warn"){ |msg| message = msg }
-      Rails.stub("logger").and_return(logger)
+      allow(logger).to receive("warn") { |msg| message = msg }
+      allow(Rails).to receive("logger").and_return(logger)
 
       begin
         document.raise_collision_retries_exceeded_error(:token, 3)
@@ -73,28 +92,47 @@ describe Mongoid::Token::Collisions do
     end
 
     it "should raise an error" do
-      expect{ document.raise_collision_retries_exceeded_error(:token, 3) }.to raise_error(Mongoid::Token::CollisionRetriesExceeded)
+      expect { document.raise_collision_retries_exceeded_error(:token, 3) }.to(
+        raise_error(Mongoid::Token::CollisionRetriesExceeded),
+      )
     end
   end
 
-  describe "#is_duplicate_token_error?" do
+  describe "#duplicate_token_error?" do
     before(:each) do
       document.class.send(:include, Mongoid::Token::Collisions)
     end
     context "when there is a duplicate key error" do
-      it "should return true" do
-        document.stub("token").and_return("tokenvalue123")
-        err = double("Mongo::Error::OperationFailure")
-        err.stub("details").and_return do
-          {
-            "err" => "E11000 duplicate key error index: mongoid_token_test.links.$token_1  dup key: { : \"tokenvalue123\" }",
-            "code" => 11000,
-            "n" => 0,
-            "connectionId" => 130,
-            "ok" => 1.0
-          }
-          document.is_duplicate_token_error?(err, document, :token)
+      before do
+        allow(document).to receive("token").and_return("tokenvalue123")
+        allow(err).to(receive("message").and_return(message))
+      end
+      let(:err) { double("Mongo::Error::OperationFailure", code: 11_000) }
+      subject { document.duplicate_token_error?(err, document, :token) }
+
+      context "mongodb version 2.6, 3.0" do
+        let(:message) do
+          "insertDocument :: caused by :: 11000 "\
+          "E11000 duplicate key error index: "\
+          "mongoid_token_test.documents.$token_1 "\
+          "dup key: { : \"tokenvalue123\" } (11000) "\
+          "(on localhost:27017, legacy retry, attempt 1) "\
+          "(on localhost:27017, legacy retry, attempt 1)"
         end
+
+        it { is_expected.to be(true) }
+      end
+
+      context "mongodb version 4" do
+        let(:message) do
+          "E11000 duplicate key error collection: "\
+          "mongoid_token_test.docs index: token_1 "\
+          "dup key: { : \"tokenvalue123\" } (11000) "\
+          "(on localhost:27017, legacy retry, attempt 1) "\
+          "(on localhost:27017, legacy retry, attempt 1)"
+        end
+
+        it { is_expected.to be(true) }
       end
     end
   end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Mongoid
   module Token
     module Finders
@@ -6,7 +8,7 @@ module Mongoid
           if token.is_a?(Array)
             self.in field_name.to_sym => token
           else
-            self.find_by field_name.to_sym => token
+            find_by field_name.to_sym => token
           end
         end
       end
