@@ -26,6 +26,9 @@ gem 'mongoid_token', '~> 3.0.0'
 
 # For mongoid >= 5
 gem 'mongoid_token', '~> 4.0.0'
+
+# For mongoid >= 6
+gem 'mongoid_token', '~> 5.0.0'
 ```
 
 Then update your bundle
@@ -101,8 +104,8 @@ This one is easy, it's just an integer.
 __Example:__
 
 ```ruby
-token :length => 6 # Tokens are now of length 6
-token :length => 12 # Whow, whow, whow. Slow down egghead.
+token length: 6 # Tokens are now of length 6
+token length: 12 # Whow, whow, whow. Slow down egghead.
 ```
 
 You get the idea.
@@ -130,8 +133,8 @@ never start with zeros
 
 __Examples:__
 ```ruby
-token :contains => :alpha_upper, :length => 8
-token :contains => :fixed_numeric
+token contains: :alpha_upper, length: 8
+token contains: :fixed_numeric
 ```
 
 #### Patterns (`:pattern`)
@@ -160,7 +163,7 @@ generated character, and are as follows:
 __Example:__
 
 ```ruby
-token :pattern => "PRE-%C%C-%d%d%d%d" # Generates something like: 'PRE-ND-3485'
+token pattern: "PRE-%C%C-%d%d%d%d" # Generates something like: 'PRE-ND-3485'
 ```
 
 You can also add a repetition modifier, which can help improve readability on
@@ -169,7 +172,7 @@ more complex patterns. You simply add any integer after the letter.
 __Examples:__
 
 ```ruby
-token :pattern => "APP-%d6" # Generates something like; "APP-638924"
+token pattern: "APP-%d6" # Generates something like; "APP-638924"
 ```
 
 ### Field Name (`:field_name`)
@@ -180,9 +183,9 @@ use multiple tokens one a single document.
 
 __Examples:__
 ```ruby
-token :length => 6
-token :field_name => :sharing_token, :length => 12
-token :field_name => :yet_another
+token length: 6
+token field_name: :sharing_token, length: 12
+token field_name: :yet_another
 ```
 
 
@@ -192,7 +195,7 @@ This will prevent the gem from creating the extra `find_by_*` methods.
 
 __Example:__
 ```ruby
-token :skip_finders => true
+token skip_finders: true
 ```
 
 
@@ -204,7 +207,7 @@ this behaviour off:
 
 __Example:__
 ```ruby
-token :override_to_param => false
+token override_to_param: false
 ```
 
 
@@ -217,8 +220,8 @@ option is for you.
 
 __Examples:__
 ```ruby
-token :retry_count => 9
-token :retry_count => 0
+token retry_count: 9
+token retry_count: 0
 ```
 
 # Notes
@@ -238,5 +241,6 @@ In particular: [olliem](https://github.com/olliem),
 [msolli](https://github.com/msolli),
 [siong1987](https://github.com/siong1987),
 [stephan778](https://github.com/stephan778),
-[eagleas](https://github.com/eagleas), and
-[jamesotron](https://github.com/jamesotron).
+[eagleas](https://github.com/eagleas),
+[jamesotron](https://github.com/jamesotron), and
+[ritxi](https://github.com/ritxi).
