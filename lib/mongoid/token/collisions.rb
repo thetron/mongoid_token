@@ -28,7 +28,8 @@ module Mongoid
       def is_duplicate_token_error?(err, document, field_name)
         err.message =~ /(11000|11001)/ &&
           err.message =~ /dup key/ &&
-          err.message =~ /"#{document.send(field_name)}"/
+          err.message =~ /"#{document.send(field_name)}"/ &&
+          true
       end
     end
   end
