@@ -103,19 +103,36 @@ describe Mongoid::Token::Collisions do
       document.class.send(:include, Mongoid::Token::Collisions)
     end
     context "when there is a duplicate key error" do
-      it "should return true" do
+      before do
         allow(document).to receive("token").and_return("tokenvalue123")
-        err = double('Mongo::Error::OperationFailure')
-        allow(err).to(receive("message")
-                      .and_return('insertDocument :: caused by :: 11000 E11000'\
-                                  ' duplicate key error index: mongoid_token_'\
-                                  'test.documents.$token_1  dup key: '\
-                                  '{ : "tokenvalue123" } (11000) (on localhost'\
-                                  ':27017, legacy retry, attempt 1) (on localh'\
-                                  'ost:27017, legacy retry, attempt 1)'))
-        expect(document.duplicate_token_error?(err, document, :token)).to(
-          be(true)
-        )
+        allow(err).to(receive("message").and_return(message))
+      end
+      let(:err) { double('Mongo::Error::OperationFailure', code: 11000) }
+      subject { document.duplicate_token_error?(err, document, :token) }
+
+      context "mongodb version 2.6, 3.0" do
+        let(:message) do
+          "insertDocument :: caused by :: 11000 "\
+          "E11000 duplicate key error index: "\
+          "mongoid_token_test.documents.$token_1 "\
+          "dup key: { : \"tokenvalue123\" } (11000) "\
+          "(on localhost:27017, legacy retry, attempt 1) "\
+          "(on localhost:27017, legacy retry, attempt 1)"
+        end
+
+        it { is_expected.to be(true) }
+      end
+
+      context "mongodb version 4" do
+        let(:message) do
+          "E11000 duplicate key error collection: "\
+          "mongoid_token_test.docs index: token_1 "\
+          "dup key: { : \"tokenvalue123\" } (11000) "\
+          "(on localhost:27017, legacy retry, attempt 1) "\
+          "(on localhost:27017, legacy retry, attempt 1)"
+        end
+
+        it { is_expected.to be(true) }
       end
     end
   end
